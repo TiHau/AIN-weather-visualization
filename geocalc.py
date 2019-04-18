@@ -3,6 +3,16 @@ import math
 EARTH_RADIUS = 6371e3  # meters
 
 
+class LatLongValue:
+    def __init__(self, lat_init, long_init, value_init):
+        self.lat = float(lat_init)
+        self.long = float(long_init)
+        self.value = float(value_init)
+
+    def __repr__(self):
+        return 'Point[ lat:' + str(self.lat) + "| long: " + str(self.long) + "| Value: " + str(self.value) + "]"
+
+
 def calculate_initial_compass_bearing(point_a, point_b):
     """
     Calculates the bearing between two points.
@@ -103,16 +113,69 @@ def calculate_distance(point_a, point_b):
     return distance
 
 
-if __name__ == '__main__':
-    constance = (47.66033, 9.17582)
-    munich = (48.137154, 11.576124)
+def interp(x1, x2, y1, y2, x_res):
+    v1 = (x_res - x1) / (x2 - x1)
+    v2 = y2 - y1
+    v3 = v1 * v2
+    res = v3 + y1
+    return res
 
-    d_con_mun = calculate_distance(constance, munich)
-    b_con_mun = calculate_initial_compass_bearing(constance, munich)
 
-    print('Distance constance -> munich' + str(d_con_mun))
-    print('Bearing constance -> munich' + str(b_con_mun))
+def getInterpolatedValue(tl, tr, bl, br, lat, long):
+    """
+            Calculates the interpolated value of a point between 4 points
+            :Parameters:
+              - `tl: Top Left Corner
+              - `tr: Top Rigth Corner
+              - `bl: Bottom Left Corner
+              - `br: Bottom Right Corner
+              - `lat: Latitude
+              - `long: Longitude
+            :Returns:
+              The value at (lat/long)
+            :Returns Type:
+              float
+            """
+    x1 = min(tl.lat, bl.lat)
+    x2 = max(tl.lat, bl.lat)
+    x3 = lat
+    y1 = min(tl.value, bl.value)
+    y2 = max(tl.value, bl.value)
+    middle_value_left = interp(x1, x2, y1, y2, x3)
 
-    for i in range(0, 11):
-        co = create_cord(constance, b_con_mun, (d_con_mun / 10) * i)
-        print(str(round(co[0], 6)) + ', ' + str(round(co[1], 6)))
+    x1 = min(tr.lat, br.lat)
+    x2 = max(tr.lat, br.lat)
+    x3 = lat
+    y1 = min(tr.value, br.value)
+    y2 = max(tr.value, br.value)
+    middle_value_right = interp(x1, x2, y1, y2, x3)
+
+    x1 = min(bl.long, br.long)
+    x2 = max(bl.long, br.long)
+    x3 = long
+    y1 = min(middle_value_left, middle_value_right)
+    y2 = max(middle_value_left, middle_value_right)
+    first_res = interp(x1, x2, y1, y2, x3)
+
+    x1 = min(tl.long, tr.long)
+    x2 = max(tl.long, tr.long)
+    x3 = long
+    y1 = min(tl.value, tr.value)
+    y2 = max(tl.value, tr.value)
+    middle_value_top = interp(x1, x2, y1, y2, x3)
+
+    x1 = min(bl.long, br.long)
+    x2 = max(bl.long, br.long)
+    x3 = long
+    y1 = min(bl.value, br.value)
+    y2 = max(bl.value, br.value)
+    middle_value_bottom = interp(x1, x2, y1, y2, x3)
+
+    x1 = min(bl.lat, tl.lat)
+    x2 = max(bl.lat, tl.lat)
+    x3 = lat
+    y1 = min(middle_value_bottom, middle_value_top)
+    y2 = max(middle_value_right, middle_value_top)
+    second_res = interp(x1, x2, y1, y2, x3)
+
+    return (first_res + second_res) / 2
