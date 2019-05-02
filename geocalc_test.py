@@ -24,6 +24,6 @@ if __name__ == '__main__':
     lat = 10.12
     long = 20.2
 
-    test_res = geocalc.getInterpolatedValue(tl, tr, bl, br, lat, long)
+    test_res = geocalc.get_interpolated_value(tl, tr, bl, br, lat, long)
 
     print(test_res)

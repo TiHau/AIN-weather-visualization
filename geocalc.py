@@ -121,7 +121,7 @@ def interp(x1, x2, y1, y2, x_res):
     return res
 
 
-def getInterpolatedValue(tl, tr, bl, br, lat, long):
+def get_interpolated_value(tl, tr, bl, br, lat, long):
     """
             Calculates the interpolated value of a point between 4 points
             :Parameters:
