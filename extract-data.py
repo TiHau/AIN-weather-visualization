@@ -6,6 +6,16 @@ import json
 
 
 class Level:
+    """Init's a new level.
+        Args:
+            level (int): Integer of the level.
+            type (str)j: Name of the level.
+
+        Attributes:
+            level (int): Integer of the level.
+            type (str)j: Name of the level.
+
+        """
     def __init__(self, level, type):
         self.level = level
         self.type = type
@@ -19,16 +29,37 @@ class Level:
 
 
 class Parameter:
+    """Init's a new parameter.
+            Args:
+                name (str): Name of the parameter.
+                data (float): Value of the parameter.
+                unit (str): Unit of the parameter
+
+            Attributes:
+                name (str): Name of the parameter.
+                data (float): Value of the parameter.
+                unit (str): Unit of the parameter
+
+            """
     def __init__(self, name, data, unit):
         self.name = name
         self.data = data
         self.unit = unit
 
     def __repr__(self):
+        """overrides the string output of parameter recursive
+
+                Returns:
+                    the parameter class as string recursive.
+
+                """
         return str(self.__dict__)
 
 
 def extract():
+    """extracts data from gfs file and save it into position map
+        the extracted data is between the coordinate1 and coordinate2
+                   """
     file = 'gfs.t00z.pgrb2.0p25.f003'  # example filename
     coordinate1 = (4,5)#(47.66033, 9.17582)
     coordinate2 = (5,6)#(48.137154, 11.576124)
