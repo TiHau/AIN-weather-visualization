@@ -9,10 +9,10 @@ class Level:
     def __init__(self, level, type):
         self.level = level
         self.type = type
-        self.parameters = []
+        self.parameters = {}
 
     def addParameter(self, parameter):
-        return self.parameters.append(parameter)
+        self.parameters[parameter.name] = parameter
 
     def __repr__(self):
         return str(self.__dict__)
@@ -30,7 +30,7 @@ class Parameter:
 
 def extract():
     file = 'gfs.t00z.pgrb2.0p25.f003'  # example filename
-    coordinate1 = (4,1)#(47.66033, 9.17582)
+    coordinate1 = (4,5)#(47.66033, 9.17582)
     coordinate2 = (5,6)#(48.137154, 11.576124)
     dataParamsToExtract = ["wind", "pressure", "height"]
     f = grib.open(file)
@@ -47,10 +47,12 @@ def extract():
             return json.JSONEncoder.default(self, obj)
 
     print(json_name)
-    content = {}
+    position = {}
+    lats = []
+    lons = []
+
     with open(json_name + ".json", "w+") as my_json:
         for lines in f:
-            position = {}
             tmp = str(lines).split(':')[:2]
             if any(dataParamToExtract in tmp[1].lower() for dataParamToExtract in dataParamsToExtract):
                 print(tmp)
@@ -61,20 +63,35 @@ def extract():
                 dataArray = g.data(coordinate1[0], coordinate2[0], coordinate1[1], coordinate2[1])
                 data = dataArray[0]
                 unit = g.parameterUnits
-                for latArrays in dataArray[1]:
-                    for lons in dataArray[2]:
-                        for lon in lons:
-                            if (latArrays[0], lon) not in position:
-                                position[(latArrays[0], lon)] = {}
-
-                            if level not in position[(latArrays[0], lon)]:
-                                position[(latArrays[0], lon)][level] = Level(level, typeOfLevel)
-
-                            #position[(latArrays[0], lon)].get(level).addParameter(Parameter(name, 0, unit))
-                        #print(position[(latArrays[0], lon)].get(level))
+                if len(lats) == 0:
+                    for latArrays in dataArray[1]:
+                        lats.append(latArrays[0])
+                    for lon in dataArray[2]:
+                        for l in lon:
+                            lons.append(l)
+                        break
+                    print(lats)
+                    print(len(lats))
+                    print(lons)
+                    print(len(lons))
+                latIndex = 0
+                for lat in lats:
+                    lonIndex = 0
+                    for lon in lons:
+                        if (lat, lon) not in position:
+                            position[(lat, lon)] = {}
+                        if level not in position[(lat, lon)]:
+                            position[(lat, lon)][level] = Level(level, typeOfLevel)
+                        if name not in position[(lat, lon)].get(level).parameters:
+                            position[(lat, lon)].get(level).addParameter(
+                                Parameter(name, data[latIndex][lonIndex], unit))
+                        lonIndex += 1
+                    latIndex += 1
+    print("finished")
 
                 #json_content["message "+tmp[0]] = json_param
        # my_json.write(json.dumps(content, cls=NumpyEncoder))
+
 
 if __name__ == '__main__':
     extract()
