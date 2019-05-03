@@ -28,4 +28,5 @@ if __name__ == '__main__':
 
     print(test_res)
 
-    print(geocalc.round_to_nearest_quarter(12.2))
+    print(geocalc.round_to_nearest_quarter_up(12.2))
+    print(geocalc.round_to_nearest_quarter_down(12.2))

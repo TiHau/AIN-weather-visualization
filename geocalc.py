@@ -181,5 +181,9 @@ def get_interpolated_value(tl, tr, bl, br, lat, long):
     return (first_res + second_res) / 2
 
 
-def round_to_nearest_quarter(value):
-    return round(value * 4) / 4
+def round_to_nearest_quarter_down(value):
+    return math.floor(value * 4) / 4
+
+
+def round_to_nearest_quarter_up(value):
+    return math.ceil(value * 4) / 4
