@@ -1,8 +1,8 @@
 class FlightData:
-    def __init__(self, file_name):
-        self.file_name = file_name
+    def __init__(self, file_name_simulation):
+        self.file_name = file_name_simulation
         self.entry_list = {}
-        file = open(file_name, "r")
+        file = open(file_name_simulation, "r")
         file.readline()  # skip header
         file.readline()
 
@@ -23,6 +23,17 @@ class FlightData:
 
     def get_waypoints(self):
         return {k: v for (k, v) in self.entry_list.items() if v.is_wp is True}
+
+    def get_path_filtered(self, num_points):
+        step_size = len(self.entry_list) / num_points
+        key_index = 1
+        path_filtered = []
+
+        for _ in range(1, num_points + 1):
+            path_filtered.append(self.entry_list[round(key_index)])
+            key_index = key_index + step_size
+
+        return path_filtered
 
     def get_sections_filtered(self, num_points):
         wps = list(self.get_waypoints().keys())

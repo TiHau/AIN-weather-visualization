@@ -1,4 +1,4 @@
-import simulation_input as si
+import FlightData as si
 import geocalc
 
 
@@ -42,7 +42,7 @@ def test_simulation():
 
     flight_data.get_waypoints()
 
-    print(flight_data.get_sections_filtered(10))
+    print(flight_data.get_path_filtered(10))
 
     print(flight_data.get_max_latitude())
     print(flight_data.get_min_latitude())
