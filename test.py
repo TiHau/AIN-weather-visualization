@@ -52,3 +52,5 @@ if __name__ == '__main__':
     start = (list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude)
     end = (list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
     print(start, end)
+    grib_data = grib2_extractor.extract("gfs.t12z.pgrb2.0p25.f003", list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude, list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
+    print("sadasd")
