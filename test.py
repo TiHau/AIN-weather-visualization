@@ -1,6 +1,6 @@
 import simulation_input as si
 import geocalc
-import grib2_extractor
+#import grib2_extractor
 
 
 def test_geocalc():
@@ -47,10 +47,12 @@ if __name__ == '__main__':
 
     t = list(waypoints.keys())
 
-    print(t)
+    print(flight_data)
+
+    print(list(waypoints.values())[0])
 
     start = (list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude)
     end = (list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
     print(start, end)
-    grib_data = grib2_extractor.extract("gfs.t12z.pgrb2.0p25.f003", list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude, list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
+    #grib_data = grib2_extractor.extract("gfs.t12z.pgrb2.0p25.f003", list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude, list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
     print("sadasd")

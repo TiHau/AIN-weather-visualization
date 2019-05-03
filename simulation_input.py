@@ -2,6 +2,9 @@ class FlightData:
     def __init__(self, entry_list):
         self.entry_list = entry_list
 
+    def __repr__(self):
+        return str(self.entry_list)
+
 
 class Entry:
     """
@@ -61,6 +64,9 @@ class Entry:
         self.latitude = float(latitude) if latitude else None
         self.longitude = float(longitude) if longitude else None
 
+    def __repr__(self):
+        return 'Entry ' + str(self.__dict__)
+
 
 def read(file_name):
     entry_list = {}
@@ -71,10 +77,10 @@ def read(file_name):
     for line in file:
         values = line.split('\t')
         entry_list[int(values[0])] = Entry(values[1], values[2], values[3], values[4], values[5], values[6], values[7],
-                                        values[8], values[9], values[10], values[11], values[12], values[13],
-                                        values[14],
-                                        values[15], values[16], values[17], values[18], values[19], values[20],
-                                        values[21],
-                                        values[22], values[23])
+                                           values[8], values[9], values[10], values[11], values[12], values[13],
+                                           values[14],
+                                           values[15], values[16], values[17], values[18], values[19], values[20],
+                                           values[21],
+                                           values[22], values[23])
 
     return FlightData(entry_list)
