@@ -37,7 +37,7 @@ class Entry:
                  gc_dist_to_next_wp,
                  gc_dist_to_destination_through_wp, navi_time_to_next_wp, flight_time, latitude, longitude):
         self.time_stamp = timestamp
-        self.is_wp = is_wp is not None
+        self.is_wp = is_wp is not ''
         self.attitude = float(attitude) if attitude else None
         self.true_track = float(true_track) if true_track else None
         self.magnetic_track = float(magnetic_track) if magnetic_track else None
