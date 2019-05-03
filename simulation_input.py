@@ -29,7 +29,7 @@ class FlightData:
 
         sections_filtered = []
 
-        for i in range(0, len(wps)-1):
+        for i in range(0, len(wps) - 1):
             section = {k: v for (k, v) in self.entry_list.items() if k in range(wps[i], wps[i + 1])}
             step_size = len(section) / num_points
 
@@ -43,6 +43,30 @@ class FlightData:
             sections_filtered.append(section_filtered)
 
         return sections_filtered
+
+    def get_min_latitude(self):
+        tmp = []
+        for entry in self.entry_list.values():
+            tmp.append(entry.latitude)
+        return min(tmp)
+
+    def get_max_latitude(self):
+        tmp = []
+        for entry in self.entry_list.values():
+            tmp.append(entry.latitude)
+        return max(tmp)
+
+    def get_min_longitude(self):
+        tmp = []
+        for entry in self.entry_list.values():
+            tmp.append(entry.longitude)
+        return min(tmp)
+
+    def get_max_longitude(self):
+        tmp = []
+        for entry in self.entry_list.values():
+            tmp.append(entry.longitude)
+        return max(tmp)
 
 
 class Entry:

@@ -44,6 +44,11 @@ def test_simulation():
 
     print(flight_data.get_sections_filtered(10))
 
+    print(flight_data.get_max_latitude())
+    print(flight_data.get_min_latitude())
+    print(flight_data.get_max_longitude())
+    print(flight_data.get_min_longitude())
+
 
 if __name__ == '__main__':
     # test_geocalc()
