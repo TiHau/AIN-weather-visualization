@@ -38,4 +38,17 @@ def test_geocalc():
 if __name__ == '__main__':
     # test_geocalc()
     flight_data = si.read('2019-05-01_EDDM-EDDH_Aviator.tsv')
-    waypoints = list(filter(lambda entry: entry.is_wp is True, flight_data.entry_list.values()))
+
+    print(flight_data.entry_list[1].latitude)
+
+    waypoints = {k: v for (k, v) in flight_data.entry_list.items() if v.is_wp is True}
+
+    print(len(waypoints))
+
+    t = list(waypoints.keys())
+
+    print(t)
+
+    start = (list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude)
+    end = (list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
+    print(start, end)
