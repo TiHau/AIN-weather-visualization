@@ -21,6 +21,29 @@ class FlightData:
     def __repr__(self):
         return str(self.entry_list)
 
+    def get_waypoints(self):
+        return {k: v for (k, v) in self.entry_list.items() if v.is_wp is True}
+
+    def get_sections_filtered(self, num_points):
+        wps = list(self.get_waypoints().keys())
+
+        sections_filtered = []
+
+        for i in range(0, len(wps)-1):
+            section = {k: v for (k, v) in self.entry_list.items() if k in range(wps[i], wps[i + 1])}
+            step_size = len(section) / num_points
+
+            key_index = list(section.keys())[0]
+            section_filtered = []
+
+            for _ in range(1, num_points + 1):
+                section_filtered.append(section[round(key_index)])
+                key_index = key_index + step_size
+
+            sections_filtered.append(section_filtered)
+
+        return sections_filtered
+
 
 class Entry:
     """

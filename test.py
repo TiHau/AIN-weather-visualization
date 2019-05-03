@@ -39,31 +39,10 @@ def test_geocalc():
 
 def test_simulation():
     flight_data = si.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
-    num_points = 10
 
-    waypoints = {k: v for (k, v) in flight_data.entry_list.items() if v.is_wp is True}
+    flight_data.get_waypoints()
 
-    print('Num Waypoints: ' + str(len(waypoints)))
-
-    start_key = list(waypoints.keys())[0]
-    end_key = list(waypoints.keys())[1]
-    section = {k: v for (k, v) in flight_data.entry_list.items() if k in range(start_key, end_key + 1)}
-    step_size = len(section) / num_points
-    section_filtered = []
-
-    key_index = 1
-
-    for i in range(1, num_points + 1):
-        section_filtered.append(section[round(key_index)])
-        key_index = key_index + step_size
-
-    print(len(section_filtered))
-
-    start = (list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude)
-    end = (list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
-    print(start, end)
-    # grib_data = grib2_extractor.extract("gfs.t12z.pgrb2.0p25.f003", list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude, list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
-    print("sadasd")
+    print(flight_data.get_sections_filtered(10))
 
 
 if __name__ == '__main__':
