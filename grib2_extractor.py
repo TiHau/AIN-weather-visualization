@@ -65,15 +65,22 @@ class Parameter:
         return str(self.__dict__)
 
 
-def extract():
+def extract(file_path, lat1, lon1, lat2, lon2):
     """extracts data from gfs file and save it into position map
         the extracted data is between the coordinate1 and coordinate2
+
+        Args:
+                file_path (str): path to grib2 file.
+                data (float): Value of the parameter.
+                unit (str): Unit of the parameter
+        Returns:
+                the map for each coordinate raster position with parameters
+
                    """
-    file = 'gfs.t00z.pgrb2.0p25.f003'  # example filename
-    coordinate1 = (4, 5)  # (47.66033, 9.17582)
-    coordinate2 = (5, 6)  # (48.137154, 11.576124)
+    coordinate1 = (lat1, lon1)
+    coordinate2 = (lat2, lon2)
     data_params_to_extract = ["wind", "pressure", "height"]
-    f = grib.open(file)
+    f = grib.open(file_path)
 
     position = {}
     lats = []
@@ -97,10 +104,6 @@ def extract():
                     for l in lon:
                         lons.append(l)
                     break
-                print(lats)
-                print(len(lats))
-                print(lons)
-                print(len(lons))
             lat_index = 0
             for lat in lats:
                 lon_index = 0
@@ -114,6 +117,4 @@ def extract():
                             Parameter(name, data[lat_index][lon_index], unit))
                     lon_index += 1
                 lat_index += 1
-
-
-print("finished")
+    return position
