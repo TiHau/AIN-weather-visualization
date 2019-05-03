@@ -5,12 +5,34 @@ import csv
 import json
 
 
-def convertToCSV():
+class Level:
+    def __init__(self, level, type):
+        self.level = level
+        self.type = type
+        self.parameters = []
+
+    def addParameter(self, parameter):
+        return self.parameters.append(parameter)
+
+    def __repr__(self):
+        return str(self.__dict__)
+
+
+class Parameter:
+    def __init__(self, name, data, unit):
+        self.name = name
+        self.data = data
+        self.unit = unit
+
+    def __repr__(self):
+        return str(self.__dict__)
+
+
+def extract():
     file = 'gfs.t00z.pgrb2.0p25.f003'  # example filename
-    coordinate1 = (47.66033, 9.17582)
-    coordinate2 = (48.137154, 11.576124)
+    coordinate1 = (4,1)#(47.66033, 9.17582)
+    coordinate2 = (5,6)#(48.137154, 11.576124)
     dataParamsToExtract = ["wind", "pressure", "height"]
-    latlons = []
     f = grib.open(file)
     g = f.message(1)
     json_name = str(g.validDate) + "-" + str(
@@ -25,10 +47,10 @@ def convertToCSV():
             return json.JSONEncoder.default(self, obj)
 
     print(json_name)
-    json_content = {}
+    content = {}
     with open(json_name + ".json", "w+") as my_json:
         for lines in f:
-            json_param = {}
+            position = {}
             tmp = str(lines).split(':')[:2]
             if any(dataParamToExtract in tmp[1].lower() for dataParamToExtract in dataParamsToExtract):
                 print(tmp)
@@ -37,29 +59,22 @@ def convertToCSV():
                 level = g.level
                 name = g.name
                 dataArray = g.data(coordinate1[0], coordinate2[0], coordinate1[1], coordinate2[1])
-                data = []
+                data = dataArray[0]
                 unit = g.parameterUnits
-                for k in dataArray:
-                        for l in k:
-                           data.append(l)
-                if len(latlons) == 0:
-                    latlons = data[2:]
-                    data = data[:2]
-                    json_param["latlons"] = latlons
-                    json_param["nameLevel"] = typeOfLevel
-                    json_param["nrLevel"] = level
-                    json_param["paramName"] = name
-                    json_param["paramUnit"] = unit
-                    json_param["paramData"] = data
-                else:
-                    data = data[:2]
-                    json_param["nameLevel"] = typeOfLevel
-                    json_param["nrLevel"] = level
-                    json_param["paramName"] = name
-                    json_param["paramUnit"] = unit
-                    json_param["paramData"] = data
-                json_content["message "+tmp[0]] = json_param
-        my_json.write(json.dumps(json_content, cls=NumpyEncoder))
+                for latArrays in dataArray[1]:
+                    for lons in dataArray[2]:
+                        for lon in lons:
+                            if (latArrays[0], lon) not in position:
+                                position[(latArrays[0], lon)] = {}
+
+                            if level not in position[(latArrays[0], lon)]:
+                                position[(latArrays[0], lon)][level] = Level(level, typeOfLevel)
+
+                            #position[(latArrays[0], lon)].get(level).addParameter(Parameter(name, 0, unit))
+                        #print(position[(latArrays[0], lon)].get(level))
+
+                #json_content["message "+tmp[0]] = json_param
+       # my_json.write(json.dumps(content, cls=NumpyEncoder))
 
 if __name__ == '__main__':
-    convertToCSV()
+    extract()
