@@ -77,8 +77,12 @@ def extract(file_path, lat1, lon1, lat2, lon2):
                 the map for each coordinate raster position with parameters
 
                    """
-    coordinate1 = (lat1, lon1)
-    coordinate2 = (lat2, lon2)
+    if lat1 >= lat2:
+        coordinate1 = (lat1, lon1)
+        coordinate2 = (lat2, lon2)
+    else:
+        coordinate2 = (lat1, lon1)
+        coordinate1 = (lat2, lon2)
     data_params_to_extract = ["wind", "pressure", "height"]
     f = grib.open(file_path)
 
