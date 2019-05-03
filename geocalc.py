@@ -179,3 +179,7 @@ def get_interpolated_value(tl, tr, bl, br, lat, long):
     second_res = interp(x1, x2, y1, y2, x3)
 
     return (first_res + second_res) / 2
+
+
+def round_to_nearest_quarter(value):
+    return round(value * 4) / 4
