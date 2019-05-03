@@ -22,9 +22,20 @@ class Level:
         self.parameters = {}
 
     def addParameter(self, parameter):
+        """adds an parameter to parameters dictionary
+            Args:
+                parameter (Parameter): an Parameter
+
+                      """
         self.parameters[parameter.name] = parameter
 
     def __repr__(self):
+        """overrides the string output of level recursive
+
+                      Returns:
+                          the level class as string recursive.
+
+                      """
         return str(self.__dict__)
 
 
