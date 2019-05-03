@@ -1,6 +1,8 @@
 import simulation_input as si
 import geocalc
-#import grib2_extractor
+
+
+# import grib2_extractor
 
 
 def test_geocalc():
@@ -35,24 +37,35 @@ def test_geocalc():
     print(geocalc.round_to_nearest_quarter_down(12.2))
 
 
-if __name__ == '__main__':
-    # test_geocalc()
-    flight_data = si.read('2019-05-01_EDDM-EDDH_Aviator.tsv')
-
-    print(flight_data.entry_list[1].latitude)
+def test_simulation():
+    flight_data = si.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
+    num_points = 10
 
     waypoints = {k: v for (k, v) in flight_data.entry_list.items() if v.is_wp is True}
 
-    print(len(waypoints))
+    print('Num Waypoints: ' + str(len(waypoints)))
 
-    t = list(waypoints.keys())
+    start_key = list(waypoints.keys())[0]
+    end_key = list(waypoints.keys())[1]
+    section = {k: v for (k, v) in flight_data.entry_list.items() if k in range(start_key, end_key + 1)}
+    step_size = len(section) / num_points
+    section_filtered = []
 
-    print(flight_data)
+    key_index = 1
 
-    print(list(waypoints.values())[0])
+    for i in range(1, num_points + 1):
+        section_filtered.append(section[round(key_index)])
+        key_index = key_index + step_size
+
+    print(len(section_filtered))
 
     start = (list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude)
     end = (list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
     print(start, end)
-    #grib_data = grib2_extractor.extract("gfs.t12z.pgrb2.0p25.f003", list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude, list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
+    # grib_data = grib2_extractor.extract("gfs.t12z.pgrb2.0p25.f003", list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude, list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
     print("sadasd")
+
+
+if __name__ == '__main__':
+    # test_geocalc()
+    test_simulation()
