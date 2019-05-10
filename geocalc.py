@@ -3,16 +3,6 @@ import math
 EARTH_RADIUS = 6371e3  # meters
 
 
-class LatLongValue:
-    def __init__(self, lat_init, long_init, value_init):
-        self.lat = float(lat_init)
-        self.long = float(long_init)
-        self.value = float(value_init)
-
-    def __repr__(self):
-        return 'Point[ lat:' + str(self.lat) + "| long: " + str(self.long) + "| Value: " + str(self.value) + "]"
-
-
 def calculate_initial_compass_bearing(point_a, point_b):
     """
     Calculates the bearing between two points.
@@ -121,7 +111,8 @@ def interp(x1, x2, y1, y2, x_res):
     return res
 
 
-def get_interpolated_value(tl_lat, tl_long, tl_value, tr_lat, tr_long, tr_value, bl_lat, bl_long, bl_value, br_lat, br_long, br_value, lat, long):
+def get_interpolated_value(tl_lat, tl_long, tl_value, tr_lat, tr_long, tr_value, bl_lat, bl_long, bl_value, br_lat,
+                           br_long, br_value, lat, long):
     x1 = min(tl_lat, bl_lat)
     x2 = max(tl_lat, bl_lat)
     x3 = lat
