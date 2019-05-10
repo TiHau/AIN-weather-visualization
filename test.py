@@ -1,8 +1,6 @@
-import simulation_input as si
+import FlightData as si
 import geocalc
-
-
-# import grib2_extractor
+import grib2_extractor
 
 
 def test_geocalc():
@@ -39,32 +37,42 @@ def test_geocalc():
 
 def test_simulation():
     flight_data = si.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
-    num_points = 10
 
-    waypoints = {k: v for (k, v) in flight_data.entry_list.items() if v.is_wp is True}
+    grib_data = grib2_extractor.extract('gfs.t12z.pgrb2.0p25.f003', geocalc.round_to_nearest_quarter_down(flight_data.get_min_latitude()),
+                                       geocalc.round_to_nearest_quarter_down(flight_data.get_min_longitude()), geocalc.round_to_nearest_quarter_up(flight_data.get_max_latitude()),
+                                       geocalc.round_to_nearest_quarter_up(flight_data.get_max_longitude()))
 
-    print('Num Waypoints: ' + str(len(waypoints)))
+    res = []
 
-    start_key = list(waypoints.keys())[0]
-    end_key = list(waypoints.keys())[1]
-    section = {k: v for (k, v) in flight_data.entry_list.items() if k in range(start_key, end_key + 1)}
-    step_size = len(section) / num_points
-    section_filtered = []
+    for entry in flight_data.get_path_filtered(10):
+        tl_lat = geocalc.round_to_nearest_quarter_up(entry.latitude)
+        tl_long = geocalc.round_to_nearest_quarter_down(entry.longitude)
+        bl_lat = geocalc.round_to_nearest_quarter_down(entry.latitude)
+        bl_long = tl_long
+        tr_lat = tl_lat
+        tr_long = geocalc.round_to_nearest_quarter_up(entry.longitude)
+        br_lat = bl_lat
+        br_long = tr_long
 
-    key_index = 1
+        tl_grib_values = grib_data[(tl_lat, tl_long)]
+        bl_grib_values = grib_data[(bl_lat, bl_long)]
+        tr_grib_values = grib_data[(tr_lat, tr_long)]
+        br_grib_values = grib_data[(br_lat, br_long)]
 
-    for i in range(1, num_points + 1):
-        section_filtered.append(section[round(key_index)])
-        key_index = key_index + step_size
+        res_values = []
 
-    print(len(section_filtered))
+        for level in tl_grib_values.values():
+            for tl_param in level.parameters.values():
+                bl_param = bl_grib_values[level.level].parameters[tl_param.name]
+                tr_param = tr_grib_values[level.level].parameters[tl_param.name]
+                br_param = br_grib_values[level.level].parameters[tl_param.name]
 
-    start = (list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude)
-    end = (list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
-    print(start, end)
-    print(section_filtered)
-    # grib_data = grib2_extractor.extract("gfs.t12z.pgrb2.0p25.f003", list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude, list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
+                ip = geocalc.get_interpolated_value(tl_lat, tl_long, tl_param.data, tr_lat, tr_long, tr_param.data, bl_lat, bl_long, bl_param.data, br_lat, br_long, br_param.data, entry.latitude, entry.longitude)
+                res_values.append((level.level, tl_param.name, tl_param.unit, ip))
 
+        res.append((entry, res_values))
+
+    print(res)
 
 if __name__ == '__main__':
     # test_geocalc()
