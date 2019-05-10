@@ -25,23 +25,23 @@ class FlightData:
 class Entry:
     """
         Attributes:
-            time_stamp (str): DateTime. TimeStamp of entry.
-            is_wp (bool): True if position reached waypoint.
-            attitude (float): ft. Current attitude.
-            true_track (float): °. ?.
-            magnetic_track (float): °. ?.
-            wind_angle (float): °. ?.
-            wind_speed (float): kt. ?.
-            head_wind_indic (?): unit?. ?.
-            cross_wind_indic (?): unit? ?.
-            tail_wind_comp (float): kt. ?.
-            cross_wind_comp_abs (float): kt. ?.
-            true_heading (float): °. ?.
-            magnetic_heading (float): °. ?.
-            wca (float): °. ?.
-            eas (float): kt. ?.
-            tas (float): kt. ?.
-            gs (float): kt. ?.
+            time_stamp (str): DateTime. TimeStamp of entry. 0
+            is_wp (bool): True if position reached waypoint. 1
+            altitude (float): ft. Current attitude. 2
+            true_track (float): °. ?. 3
+            magnetic_track (float): °.  4?.
+            wind_angle (float): °. ?.5
+            wind_speed (float): kt. ?.6
+            head_wind_indic (?): unit?.7 ?.
+            cross_wind_indic (?): unit? 8?.
+            tail_wind_comp (float): kt. ?9.
+            cross_wind_comp_abs (float): kt 10. ?.
+            true_heading (float): °. ?. 11
+            magnetic_heading (float): °. ? 12.
+            wca (float): °. ?. 13
+            eas (float): kt. ?. 14
+            tas (float): kt. ?. 15
+            gs (float): kt. ?.16
             gc_dist_to_next_wp (float): NM. ?.
             gc_dist_to_destination_through_wp (float): NM. ?.
             navi_time_to_next_wp (str): time. ?.
