@@ -1,5 +1,5 @@
 import pygrib as grib
-
+import json
 class Level:
     """Init's a new level.
         Args:
@@ -118,4 +118,26 @@ def extract(file_path, lat1, lon1, lat2, lon2):
                             Parameter(name, data[lat_index][lon_index], unit))
                     lon_index += 1
                 lat_index += 1
+
     return position
+
+
+def export_to_json(dictionary):
+    json_name = "grib2_gfs_data"
+    with open(json_name + ".json", "w+") as my_json:
+        content = {}
+        for entry in dictionary.keys():
+            content[str(entry)] = {}
+            for level in dictionary.get(entry).keys():
+                content[str(entry)][str(level)] = {}
+                level_class = dictionary.get(entry).get(level)
+                content[str(entry)][str(level)]["name"] = str(level_class.name)
+                content[str(entry)][str(level)]["level"] = str(level_class.level)
+                content[str(entry)][str(level)]["parameters"] = {}
+                for parameter in dictionary.get(entry).get(level).parameters:
+                    content[str(entry)][str(level)]["parameters"][str(parameter)] = {}
+                    parameter_class = dictionary.get(entry).get(level).parameters.get(parameter)
+                    content[str(entry)][str(level)]["parameters"][str(parameter)]["name"] = str(parameter_class.name)
+                    content[str(entry)][str(level)]["parameters"][str(parameter)]["data"] = str(parameter_class.data)
+                    content[str(entry)][str(level)]["parameters"][str(parameter)]["unit"] = str(parameter_class.unit)
+        my_json.write(json.dumps(content))
