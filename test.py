@@ -47,10 +47,12 @@ def test_simulation():
     print(flight_data.get_max_longitude())
     print(flight_data.get_min_longitude())
 
-    grib_data = grib2_extractor.extract('gfs.t12z.pgrb2.0p25.f003', geocalc.round_to_nearest_quarter_down(flight_data.get_min_latitude()),
+    path, grib_data = grib2_extractor.extract('gfs.t00z.pgrb2.0p25.f003', geocalc.round_to_nearest_quarter_down(flight_data.get_min_latitude()),
                                         geocalc.round_to_nearest_quarter_down(flight_data.get_min_longitude()), geocalc.round_to_nearest_quarter_up(flight_data.get_max_latitude()),
-                                        geocalc.round_to_nearest_quarter_up(flight_data.get_max_longitude()))
+                                        geocalc.round_to_nearest_quarter_up(flight_data.get_max_longitude()), ["wind", "pressure", "height", "temp"])
 
+    grib2_extractor.export_to_json(grib_data, path)
+    js = grib2_extractor.import_from_json(path + ".json")
     print()
 
 if __name__ == '__main__':
