@@ -148,25 +148,35 @@ def plotting():
 
     # plot altitude depending on time
     new_time = []
+    maximum = 0
     for t in list_time:
         new_time.append(dt.datetime.strptime(t, '%Y-%m-%d %H:%M:%S.%f'))
 
+    lvl_cnt = 0
+    print(type(u_comp.keys()))
     for lvl in u_comp.keys():
-        print(u_comp.get(lvl))
-        plt.barbs(np.arange(0, 10), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)))
+        print(lvl)
+        lvl_cnt += 1
+        #plt.subplot(26, 1, lvl_cnt)
+        plt.barbs(np.arange(1, 11), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)))
+        if maximum <= int(lvl):
+            maximum = int(lvl)
 
     # plot barb for each grid coordinate
     #plt.barbs(new_time, pressure[0], np.array(u_comp), np.array(v_comp))
 
-    #ticks = np.linspace(10, 1000, 26)
-    #plt.yticks(ticks)
+    #ticks = np.linspace(0, l)
+    plt.yticks(u_comp.keys())
     # Flughöhe in Metern anzeigen
 
     #ax.plot(new_time, list_alt)
     #plt.gcf().autofmt_xdate()
 
-    #ax.set_ylim([0, 60000])
     ax.set_xlabel("Flugzeit")
+    ax.set_xticks(np.arange(1,11, step=1))
+
+    ax.set_yticks(np.arange(0, maximum, step=100))
+
     #ax.set_ylabel("Höhe")
     fig.tight_layout()
 
