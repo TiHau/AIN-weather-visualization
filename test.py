@@ -19,7 +19,6 @@ def test_geocalc():
         print(str(round(co[0], 6)) + ', ' + str(round(co[1], 6)))
 
     # Test interpolation
-
     lat = 10.12
     long = 20.2
 

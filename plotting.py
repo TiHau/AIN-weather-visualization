@@ -4,6 +4,7 @@ import numpy as np
 import grib2_extractor as grb
 import FlightData as Fd
 import datetime as dt
+import geocalc
 import time
 
 # arrival_time: time of arrival as last value on x-axis
@@ -18,32 +19,6 @@ def plotting():
     # elevation (separate plot)
 
     flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
-
-    # Getting waypoints (irrelevant for now)
-    #num_points = 10  # number of waypoints
-
-    #waypoints = {k: v for (k, v) in flight_data.entry_list.items() if v.is_wp is True}
-
-    #print('Num Waypoints: ' + str(len(waypoints)))
-
-    #start_key = list(waypoints.keys())[0]
-    #end_key = list(waypoints.keys())[1]
-
-    #section = {k: v for (k, v) in flight_data.entry_list.items() if k in range(start_key, end_key + 1)}
-    #step_size = len(section) / num_points
-    #section_filtered = []
-
-    #key_index = 1
-
-
-     #   section_filtered.append(section[round(key_index)])
-      #  key_index = key_index + step_size
-
-    #print(len(section_filtered))
-
-    #start = (list(waypoints.values())[0].latitude, list(waypoints.values())[0].longitude)
-    #end = (list(waypoints.values())[1].latitude, list(waypoints.values())[1].longitude)
-
 
     # Getting the needed values inside a list: Altitude, flight time, angle and speed
     list_angle = []
@@ -107,6 +82,68 @@ def plotting():
     #print(listU)
     #print(len(listU))
 
+    #extracting json data
+    grib_data = grb.import_from_json("gfs.t00z.pgrb2.0p25.f003.json")
+
+    res = []
+    for entry in flight_data.get_path_filtered(10):
+        tl_lat = geocalc.round_to_nearest_quarter_up(entry.latitude)
+        tl_long = geocalc.round_to_nearest_quarter_down(entry.longitude)
+        bl_lat = geocalc.round_to_nearest_quarter_down(entry.latitude)
+        bl_long = tl_long
+        tr_lat = tl_lat
+        tr_long = geocalc.round_to_nearest_quarter_up(entry.longitude)
+        br_lat = bl_lat
+        br_long = tr_long
+        tl_grib_values = grib_data[(tl_lat, tl_long)]
+        bl_grib_values = grib_data[(bl_lat, bl_long)]
+        tr_grib_values = grib_data[(tr_lat, tr_long)]
+        br_grib_values = grib_data[(br_lat, br_long)]
+
+        res_values = []
+
+        for level in tl_grib_values.values():
+            for tl_param in level.parameters.values():
+                bl_param = bl_grib_values[level.level].parameters[tl_param.name]
+                tr_param = tr_grib_values[level.level].parameters[tl_param.name]
+                br_param = br_grib_values[level.level].parameters[tl_param.name]
+
+                try:
+                    ip = geocalc.get_interpolated_value(tl_lat, tl_long, tl_param.data, tr_lat, tr_long, tr_param.data,
+                                                        bl_lat, bl_long, bl_param.data, br_lat, br_long, br_param.data,
+                                                        entry.latitude, entry.longitude)
+                    res_values.append((level.level, level.name, tl_param.name, tl_param.unit, ip))
+                except:
+                    pass
+
+        res.append(res_values)
+
+        # putting data in lists
+        heights = {}
+        u_comp = {}
+        v_comp = {}
+        temperature = {}
+
+        for en in res:
+            for val in en:
+                if 10 <= val[0] <= 1000 and val[1] == 'isobaricInhPa':
+                    if val[2] == 'Geopotential Height':
+                        if val[0] not in heights:
+                            heights[val[0]] = []
+                        heights[val[0]].append(val[4])
+                    elif val[2] == 'U component of wind':
+                        if val[0] not in u_comp:
+                            u_comp[val[0]] = []
+                        u_comp[val[0]].append(val[4])
+                    elif val[2] == 'V component of wind':
+                        if val[0] not in v_comp:
+                            v_comp[val[0]] = []
+                        v_comp[val[0]].append(val[4])
+                    elif val[2] == 'Temperature':
+                        if val[0] not in temperature:
+                            temperature[val[0]] = []
+                        temperature[val[0]].append(val[4])
+
     fig, ax = plt.subplots()
 
     # plot altitude depending on time
@@ -114,23 +151,26 @@ def plotting():
     for t in list_time:
         new_time.append(dt.datetime.strptime(t, '%Y-%m-%d %H:%M:%S.%f'))
 
-    print("Lengths:" + str(len(xx)) + " " + str(len(yy)) + " " + str(len(np.array(list_u))) + " " + str(len(np.array(list_v))))
+    for lvl in u_comp.keys():
+        print(u_comp.get(lvl))
+        plt.barbs(np.arange(0, 10), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)))
 
     # plot barb for each grid coordinate
-    #plt.barbs(x, y, np.array(list_u), np.array(list_v))
+    #plt.barbs(new_time, pressure[0], np.array(u_comp), np.array(v_comp))
 
+    #ticks = np.linspace(10, 1000, 26)
+    #plt.yticks(ticks)
     # Flughöhe in Metern anzeigen
 
-    ax.plot(new_time, list_alt)
-    plt.gcf().autofmt_xdate()
+    #ax.plot(new_time, list_alt)
+    #plt.gcf().autofmt_xdate()
 
-    ax.set_ylim([0, 60000])
+    #ax.set_ylim([0, 60000])
     ax.set_xlabel("Flugzeit")
-    ax.set_ylabel("Höhe")
+    #ax.set_ylabel("Höhe")
     fig.tight_layout()
 
     plt.show()
-
 
 if __name__ == '__main__':
     plotting()
