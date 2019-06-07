@@ -178,6 +178,8 @@ def plotting():
 
     #ax.set_ylabel("Höhe")
     fig.tight_layout()
+    ax = plt.gca()
+    ax.invert_yaxis()
 
     plt.show()
 
