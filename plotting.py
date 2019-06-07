@@ -4,7 +4,7 @@ import numpy as np
 import grib2_extractor as grb
 import FlightData as Fd
 import datetime as dt
-import geocalc
+import util
 import time
 
 # arrival_time: time of arrival as last value on x-axis
@@ -24,12 +24,12 @@ def plotting(num_waypoints):
     res = []
     at_waypoint = []
     for entry in flight_data.get_path_filtered(num_waypoints):
-        tl_lat = geocalc.round_to_nearest_quarter_up(entry.latitude)
-        tl_long = geocalc.round_to_nearest_quarter_down(entry.longitude)
-        bl_lat = geocalc.round_to_nearest_quarter_down(entry.latitude)
+        tl_lat = util.round_to_nearest_quarter_up(entry.latitude)
+        tl_long = util.round_to_nearest_quarter_down(entry.longitude)
+        bl_lat = util.round_to_nearest_quarter_down(entry.latitude)
         bl_long = tl_long
         tr_lat = tl_lat
-        tr_long = geocalc.round_to_nearest_quarter_up(entry.longitude)
+        tr_long = util.round_to_nearest_quarter_up(entry.longitude)
         br_lat = bl_lat
         br_long = tr_long
         tl_grib_values = grib_data[(tl_lat, tl_long)]
@@ -44,9 +44,9 @@ def plotting(num_waypoints):
                 tr_param = tr_grib_values[level.level].parameters[tl_param.name]
                 br_param = br_grib_values[level.level].parameters[tl_param.name]
                 try:
-                    ip = geocalc.get_interpolated_value(tl_lat, tl_long, tl_param.data, tr_lat, tr_long, tr_param.data,
-                                                        bl_lat, bl_long, bl_param.data, br_lat, br_long, br_param.data,
-                                                        entry.latitude, entry.longitude)
+                    ip = util.get_interpolated_value(tl_lat, tl_long, tl_param.data, tr_lat, tr_long, tr_param.data,
+                                                     bl_lat, bl_long, bl_param.data, br_lat, br_long, br_param.data,
+                                                     entry.latitude, entry.longitude)
                     res_values.append((level.level, level.name, tl_param.name, tl_param.unit, ip))
                 except:
                     pass
