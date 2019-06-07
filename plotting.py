@@ -126,7 +126,7 @@ def plotting():
 
         for en in res:
             for val in en:
-                if 10 <= val[0] <= 1000 and val[1] == 'isobaricInhPa':
+                if 50 <= val[0] <= 1000 and val[1] == 'isobaricInhPa':
                     if val[2] == 'Geopotential Height':
                         if val[0] not in heights:
                             heights[val[0]] = []
@@ -158,7 +158,7 @@ def plotting():
         print(lvl)
         lvl_cnt += 1
         #plt.subplot(26, 1, lvl_cnt)
-        plt.barbs(np.arange(1, 11), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)))
+        plt.barbs(np.arange(1, 11), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5 ,rasterized=True)
         if maximum <= int(lvl):
             maximum = int(lvl)
 
@@ -166,16 +166,15 @@ def plotting():
     #plt.barbs(new_time, pressure[0], np.array(u_comp), np.array(v_comp))
 
     #ticks = np.linspace(0, l)
-    plt.yticks(u_comp.keys())
+    #plt.yticks(u_comp.keys())
     # Flughöhe in Metern anzeigen
 
     #ax.plot(new_time, list_alt)
     #plt.gcf().autofmt_xdate()
-
+    plt.grid()
     ax.set_xlabel("Flugzeit")
     ax.set_xticks(np.arange(1,11, step=1))
 
-    ax.set_yticks(np.arange(0, maximum, step=100))
 
     #ax.set_ylabel("Höhe")
     fig.tight_layout()
