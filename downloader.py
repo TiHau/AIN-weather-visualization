@@ -1,6 +1,7 @@
 import datetime
 import ftplib
 import os
+import FlightData
 
 
 def download(start, end):
@@ -33,3 +34,10 @@ def download_file(time_stamp, local_path):
             ftp.retrbinary('RETR ' + file, open(local_path + '/' + file, 'wb').write, 1024)
             ftp.quit()
             print('downloaded: ' + file)
+
+
+if __name__ == '__main__':
+    flight_data = FlightData.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
+    first_ts = flight_data.get_first_time_stamp()
+    last_ts = flight_data.get_last_time_stamp()
+    download(first_ts, last_ts)
