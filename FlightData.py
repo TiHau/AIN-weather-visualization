@@ -1,3 +1,6 @@
+import datetime
+
+
 class FlightData:
     def __init__(self, file_name_simulation):
         self.file_name = file_name_simulation
@@ -8,7 +11,9 @@ class FlightData:
 
         for line in file:
             values = line.split('\t')
-            self.entry_list[int(values[0])] = Entry(values[1], values[2], values[3], values[4], values[5], values[6],
+            ts = values[1].split('.')[0]  # cut millis
+            ts = datetime.datetime.strptime(ts, '%Y-%m-%d %H:%M:%S')
+            self.entry_list[int(values[0])] = Entry(ts, values[2], values[3], values[4], values[5], values[6],
                                                     values[7],
                                                     values[8], values[9], values[10], values[11], values[12],
                                                     values[13],
@@ -79,13 +84,40 @@ class FlightData:
             tmp.append(entry.longitude)
         return max(tmp)
 
+    def get_first_time_stamp(self):
+        ts = list(self.entry_list.values())[0].time_stamp
+        if ts.hour in {0, 1, 2, 3, 4, 5}:
+            tmp_hour = 0
+        elif ts.hour in {6, 7, 8, 9, 10, 11}:
+            tmp_hour = 6
+        elif ts.hour in {12, 13, 14, 15, 16, 17}:
+            tmp_hour = 12
+        else:
+            tmp_hour = 18
+        ts = ts.replace(microsecond=0, second=0, minute=0, hour=tmp_hour)
+        return ts
+
+    def get_last_time_stamp(self):
+        tmp_list = list(self.entry_list.values())
+        ts = tmp_list[len(tmp_list) - 1].time_stamp
+        if ts.hour in {0, 1, 2, 3, 4, 5}:
+            tmp_hour = 0
+        elif ts.hour in {6, 7, 8, 9, 10, 11}:
+            tmp_hour = 6
+        elif ts.hour in {12, 13, 14, 15, 16, 17}:
+            tmp_hour = 12
+        else:
+            tmp_hour = 18
+        ts = ts.replace(microsecond=0, second=0, minute=0, hour=tmp_hour)
+        return ts
+
 
 class Entry:
     """
         Attributes:
             time_stamp (str): DateTime. TimeStamp of entry.
             is_wp (bool): True if position reached waypoint.
-            altitude (float): ft. Current attitude.
+            attitude (float): ft. Current attitude.
             true_track (float): °. ?.
             magnetic_track (float): °. ?
             wind_angle (float): °. ?
