@@ -48,7 +48,6 @@ def plotting():
     print(list_time)
     y = np.linspace(0, 60000, 12)
     x = np.linspace(0, len(list_time), 12)
-
     # calculate the points on the grid where the wind barbs are to be displayed later
     xx, yy = np.meshgrid(x, y)
 
@@ -172,11 +171,11 @@ def plotting():
     #ax.plot(new_time, list_alt)
     #plt.gcf().autofmt_xdate()
     plt.grid()
-    ax.set_xlabel("Flugzeit")
+    ax.set_xlabel("Waypoints")
     ax.set_xticks(np.arange(1,11, step=1))
 
 
-    #ax.set_ylabel("Höhe")
+    ax.set_ylabel("Pressure")
     fig.tight_layout()
     ax = plt.gca()
     ax.invert_yaxis()
