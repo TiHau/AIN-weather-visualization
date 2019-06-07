@@ -21,35 +21,35 @@ def plotting():
     flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
 
     # Getting the needed values inside a list: Altitude, flight time, angle and speed
-    list_angle = []
-    list_speed = []
-    list_time = []
-    list_alt = []
-    for i in flight_data.entry_list.values():
-        list_angle.append(i.wind_angle)
-        list_speed.append(i.wind_speed)
-        list_time.append(i.time_stamp)
-        list_alt.append(i.attitude)
+    #list_angle = []
+    #list_speed = []
+    #list_time = []
+    #list_alt = []
+    #for i in flight_data.entry_list.values():
+        #list_angle.append(i.wind_angle)
+        #list_speed.append(i.wind_speed)
+        #list_time.append(i.time_stamp)
+       # list_alt.append(i.attitude)
 
-    print(str(len(list_angle)), str(len(list_speed)), str(len(list_time)), str(len(list_alt)))
+    #print(str(len(list_angle)), str(len(list_speed)), str(len(list_time)), str(len(list_alt)))
 # calculate u and v values (needed for barb plotting)
-    list_u = []
-    list_v = []
-    index_angle = 0
-    cnt = 0
-    for j in list_speed:
-        if cnt > 74:  # ensure that the arrays have a length of 12 FOR TESTING PURPOSE
-            list_u.append(j * np.cos(list_angle[index_angle]))
-            list_v.append(j * np.sin(list_angle[index_angle]))
-            index_angle += 1
-            cnt = 0
-        cnt += 1
+    #list_u = []
+    #list_v = []
+    #index_angle = 0
+    #cnt = 0
+    #for j in list_speed:
+       # if cnt > 74:  # ensure that the arrays have a length of 12 FOR TESTING PURPOSE
+         #   list_u.append(j * np.cos(list_angle[index_angle]))
+        #    list_v.append(j * np.sin(list_angle[index_angle]))
+       #     index_angle += 1
+      #      cnt = 0
+     #   cnt += 1
 
-    print(list_time)
-    y = np.linspace(0, 60000, 12)
-    x = np.linspace(0, len(list_time), 12)
+    #print(list_time)
+    #y = np.linspace(0, 60000, 12)
+    #x = np.linspace(0, len(list_time), 12)
     # calculate the points on the grid where the wind barbs are to be displayed later
-    xx, yy = np.meshgrid(x, y)
+    #xx, yy = np.meshgrid(x, y)
 
     #cnt = 0
     #xlist = []
@@ -146,10 +146,10 @@ def plotting():
     fig, ax = plt.subplots()
 
     # plot altitude depending on time
-    new_time = []
+    #new_time = []
     maximum = 0
-    for t in list_time:
-        new_time.append(dt.datetime.strptime(t, '%Y-%m-%d %H:%M:%S.%f'))
+    #for t in list_time:
+     #   new_time.append(dt.datetime.strptime(t, '%Y-%m-%d %H:%M:%S.%f'))
 
     lvl_cnt = 0
     print(type(u_comp.keys()))
