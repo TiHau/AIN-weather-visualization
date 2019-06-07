@@ -11,6 +11,10 @@ import time
 # height: highest displayed point above sea level
 def plotting():
 
+    FEET_TO_METERS = 0.305
+    UPPER_LIMIT = 1000
+    LOWER_LIMIT = 50
+
     # NEEDED FOR VISUALIZATION
     # altitude (y-axis)
     # flight time (x axis)
@@ -85,8 +89,7 @@ def plotting():
     grib_data = grb.import_from_json("gfs.t00z.pgrb2.0p25.f003.json")
 
     res = []
-    at_waypoint = {}
-    index_waypoint = 1
+    at_waypoint = []
     for entry in flight_data.get_path_filtered(10):
         tl_lat = geocalc.round_to_nearest_quarter_up(entry.latitude)
         tl_long = geocalc.round_to_nearest_quarter_down(entry.longitude)
@@ -100,8 +103,7 @@ def plotting():
         bl_grib_values = grib_data[(bl_lat, bl_long)]
         tr_grib_values = grib_data[(tr_lat, tr_long)]
         br_grib_values = grib_data[(br_lat, br_long)]
-        at_waypoint[index_waypoint] = entry
-        index_waypoint += 1
+        at_waypoint.append(entry)
         res_values = []
         for level in tl_grib_values.values():
             for tl_param in level.parameters.values():
@@ -125,7 +127,7 @@ def plotting():
 
         for en in res:
             for val in en:
-                if 50 <= val[0] <= 1000 and val[1] == 'isobaricInhPa':
+                if LOWER_LIMIT <= val[0] <= UPPER_LIMIT and val[1] == 'isobaricInhPa':
                     if val[2] == 'Geopotential Height':
                         if val[0] not in heights:
                             heights[val[0]] = []
@@ -155,11 +157,51 @@ def plotting():
     for lvl in u_comp.keys():
         lvl_cnt += 1
         #plt.subplot(26, 1, lvl_cnt)
-        plt.barbs(np.arange(1, 11), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5 ,rasterized=True)
+        plt.barbs(np.arange(1, 11), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5.5 ,rasterized=True)
         if maximum <= int(lvl):
             maximum = int(lvl)
-    for entry in at_waypoint.values():
-        print(entry.attitude)
+
+    # Höhe der Wegpunkte
+    height_pressure_upper = {}
+    height_pressure_lower = {}
+    height_pressure_invalid = {}
+
+    #print(len(list(heights.values())[0]))
+
+    index = 0
+    lat_lon = []
+
+    for entry in at_waypoint:
+        print(entry.attitude*FEET_TO_METERS)
+        lat_lon.append(str(entry.latitude) + ",\n " + str(entry.longitude))
+        height_pressure_upper[index+1] = []
+        height_pressure_lower[index+1] = []
+        height_pressure_invalid[index+1] = []
+        for (k,v) in heights.items():
+            #print(str(entry.attitude) + " : ")
+            if v[index] > entry.attitude*FEET_TO_METERS:
+                height_pressure_upper[index+1].append(k)
+            if v[index] < entry.attitude*FEET_TO_METERS:
+                height_pressure_lower[index+1].append(k)
+            if v[index] == entry.attitude*FEET_TO_METERS:
+                height_pressure_invalid[index + 1].append(k)
+        index += 1
+
+    print(lat_lon)
+
+    pressure_upper = []
+    for entry in height_pressure_upper.values():
+        try:
+            pressure_upper.append(entry[len(entry)-1])
+        except IndexError:
+            pass
+
+    pressure_lower = []
+    for entry in height_pressure_lower.values():
+        try:
+            pressure_lower.append(entry[0])
+        except IndexError:
+            pressure_lower.append(float(UPPER_LIMIT))
 
     # plot barb for each grid coordinate
     #plt.barbs(new_time, pressure[0], np.array(u_comp), np.array(v_comp))
@@ -171,8 +213,11 @@ def plotting():
     #ax.plot(new_time, list_alt)
     #plt.gcf().autofmt_xdate()
     plt.grid()
+    plt.plot(np.arange(1,11, step=1), pressure_upper)
+    plt.plot(np.arange(1,11, step=1), pressure_lower)
     ax.set_xlabel("Waypoints")
     ax.set_xticks(np.arange(1,11, step=1))
+    ax.set_xticklabels(lat_lon)
     ax.set_ylabel("Pressure")
     fig.tight_layout()
     ax = plt.gca()
