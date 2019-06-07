@@ -23,7 +23,7 @@ def download_file(time_stamp, local_path):
 
         # only download if file doesn't exist
         try:
-            open(file, 'r')
+            open(local_path + '/' + file, 'r')
             print('file exists')
         except FileNotFoundError:
             print('Starting download')
