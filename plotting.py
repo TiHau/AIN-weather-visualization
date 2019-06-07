@@ -85,6 +85,8 @@ def plotting():
     grib_data = grb.import_from_json("gfs.t00z.pgrb2.0p25.f003.json")
 
     res = []
+    at_waypoint = {}
+    index_waypoint = 1
     for entry in flight_data.get_path_filtered(10):
         tl_lat = geocalc.round_to_nearest_quarter_up(entry.latitude)
         tl_long = geocalc.round_to_nearest_quarter_down(entry.longitude)
@@ -98,15 +100,14 @@ def plotting():
         bl_grib_values = grib_data[(bl_lat, bl_long)]
         tr_grib_values = grib_data[(tr_lat, tr_long)]
         br_grib_values = grib_data[(br_lat, br_long)]
-
+        at_waypoint[index_waypoint] = entry
+        index_waypoint += 1
         res_values = []
-
         for level in tl_grib_values.values():
             for tl_param in level.parameters.values():
                 bl_param = bl_grib_values[level.level].parameters[tl_param.name]
                 tr_param = tr_grib_values[level.level].parameters[tl_param.name]
                 br_param = br_grib_values[level.level].parameters[tl_param.name]
-
                 try:
                     ip = geocalc.get_interpolated_value(tl_lat, tl_long, tl_param.data, tr_lat, tr_long, tr_param.data,
                                                         bl_lat, bl_long, bl_param.data, br_lat, br_long, br_param.data,
@@ -114,7 +115,6 @@ def plotting():
                     res_values.append((level.level, level.name, tl_param.name, tl_param.unit, ip))
                 except:
                     pass
-
         res.append(res_values)
 
         # putting data in lists
@@ -142,7 +142,7 @@ def plotting():
                         if val[0] not in temperature:
                             temperature[val[0]] = []
                         temperature[val[0]].append(val[4])
-
+    print(at_waypoint)
     fig, ax = plt.subplots()
 
     # plot altitude depending on time
@@ -152,14 +152,14 @@ def plotting():
      #   new_time.append(dt.datetime.strptime(t, '%Y-%m-%d %H:%M:%S.%f'))
 
     lvl_cnt = 0
-    print(type(u_comp.keys()))
     for lvl in u_comp.keys():
-        print(lvl)
         lvl_cnt += 1
         #plt.subplot(26, 1, lvl_cnt)
         plt.barbs(np.arange(1, 11), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5 ,rasterized=True)
         if maximum <= int(lvl):
             maximum = int(lvl)
+    for entry in at_waypoint.values():
+        print(entry.attitude)
 
     # plot barb for each grid coordinate
     #plt.barbs(new_time, pressure[0], np.array(u_comp), np.array(v_comp))
@@ -173,13 +173,10 @@ def plotting():
     plt.grid()
     ax.set_xlabel("Waypoints")
     ax.set_xticks(np.arange(1,11, step=1))
-
-
     ax.set_ylabel("Pressure")
     fig.tight_layout()
     ax = plt.gca()
     ax.invert_yaxis()
-
     plt.show()
 
 if __name__ == '__main__':
