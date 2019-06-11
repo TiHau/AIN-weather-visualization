@@ -77,7 +77,7 @@ def plotting(num_waypoints):
                         if val[0] not in temperature:
                             temperature[val[0]] = []
                         temperature[val[0]].append(val[4])
-    print(at_waypoint)
+
     fig, ax = plt.subplots()
 
 
@@ -88,30 +88,29 @@ def plotting(num_waypoints):
 
     # Höhe der Wegpunkte
     height_pressure_upper = {}
+    height_upper = {}
     height_pressure_lower = {}
-    height_pressure_invalid = {}
-
+    height_lower = {}
+    height_original = []
 
     index = 0
     lat_lon = []
 
     for entry in at_waypoint:
-        print(entry.attitude*FEET_TO_METERS)
         lat_lon.append(str(entry.latitude) + ",\n " + str(entry.longitude))
         height_pressure_upper[index+1] = []
+        height_upper[index+1] = []
         height_pressure_lower[index+1] = []
-        height_pressure_invalid[index+1] = []
-        for (k,v) in heights.items():
-            #print(str(entry.attitude) + " : ")
+        height_lower[index + 1] = []
+        height_original.append(entry.attitude*FEET_TO_METERS)
+        for (k, v) in heights.items():
             if v[index] > entry.attitude*FEET_TO_METERS:
+                height_upper[index+1].append(v[index])
                 height_pressure_upper[index+1].append(k)
-            if v[index] < entry.attitude*FEET_TO_METERS:
+            if v[index] <= entry.attitude*FEET_TO_METERS:
+                height_lower[index + 1].append(v[index])
                 height_pressure_lower[index+1].append(k)
-            if v[index] == entry.attitude*FEET_TO_METERS:
-                height_pressure_invalid[index + 1].append(k)
         index += 1
-
-    print(lat_lon)
 
     pressure_upper = []
     for entry in height_pressure_upper.values():
@@ -119,17 +118,43 @@ def plotting(num_waypoints):
             pressure_upper.append(entry[len(entry)-1])
         except IndexError:
             pass
-
+    height_tmp_upper = []
+    for entry in height_upper.values():
+        try:
+            height_tmp_upper.append(entry[len(entry) - 1])
+        except IndexError:
+            pass
     pressure_lower = []
     for entry in height_pressure_lower.values():
         try:
             pressure_lower.append(entry[0])
         except IndexError:
-            pressure_lower.append(float(UPPER_LIMIT))
+            pressure_lower.append(UPPER_LIMIT)
+    height_tmp_lower = []
+    for entry in height_lower.values():
+        try:
+            height_tmp_lower.append(entry[0])
+        except IndexError:
+            height_tmp_lower.append(float(0.0))
+    # calculate pressure to height of vehicle
+    result_pressure_height = []
+    for i in np.arange(0, num_waypoints, step=1):
+        lower_h = float(height_tmp_lower[i])
+        upper_h = float(height_tmp_upper[i])
+        original = float(height_original[i])
+        lower_p = float(pressure_lower[i])
+        upper_p = float(pressure_upper[i])
+        if lower_h == original:
+            result_pressure_height.append(lower_p)
+        else:
+            one_percent_h = (upper_h - lower_h) / 100
+            percent_of_diff = (original - lower_h)/one_percent_h
+            one_percent_p = (upper_p -lower_p) /100
+            add_to_lower = one_percent_p * percent_of_diff
+            result_pressure_height.append(lower_p + add_to_lower)
 
     plt.grid()
-    plt.plot(np.arange(1, num_waypoints + 1, step=1), pressure_upper)
-    plt.plot(np.arange(1,num_waypoints + 1, step=1), pressure_lower)
+    plt.plot(np.arange(1, num_waypoints + 1, step=1), result_pressure_height)
     ax.set_xlabel("Waypoints")
     ax.set_xticks(np.arange(1,num_waypoints + 1, step=1))
     ax.set_xticklabels(lat_lon)
