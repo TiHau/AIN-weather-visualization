@@ -14,7 +14,7 @@ def download(start, end):
 
 def download_file(time_stamp, local_path):
     path = '/pub/data/nccf/com/gfs/prod/gfs.' + time_stamp.strftime('%Y') + time_stamp.strftime(
-        '%m') + time_stamp.strftime('%d') + time_stamp.strftime('%H') + '/'
+        '%m') + time_stamp.strftime('%d') + "/" + time_stamp.strftime('%H') + '/'
 
     files = {'gfs.t' + time_stamp.strftime('%H') + 'z.pgrb2.0p25.f003',
              'gfs.t' + time_stamp.strftime('%H') + 'z.pgrb2.0p25.f006'}
