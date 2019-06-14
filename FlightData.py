@@ -84,38 +84,28 @@ class FlightData:
             tmp.append(entry.longitude)
         return max(tmp)
 
-    def get_first_time_stamp(self):
-        ts = list(self.entry_list.values())[0].time_stamp
-        if ts.hour in {0, 1, 2, 3, 4, 5}:
-            tmp_hour = 0
-        elif ts.hour in {6, 7, 8, 9, 10, 11}:
-            tmp_hour = 6
-        elif ts.hour in {12, 13, 14, 15, 16, 17}:
-            tmp_hour = 12
-        else:
-            tmp_hour = 18
-        ts = ts.replace(microsecond=0, second=0, minute=0, hour=tmp_hour)
-        return ts
+    def split_in_timesecions(self):
+        res = {}
 
-    def get_last_time_stamp(self):
-        tmp_list = list(self.entry_list.values())
-        ts = tmp_list[len(tmp_list) - 1].time_stamp
-        if ts.hour in {0, 1, 2, 3, 4, 5}:
-            tmp_hour = 0
-        elif ts.hour in {6, 7, 8, 9, 10, 11}:
-            tmp_hour = 6
-        elif ts.hour in {12, 13, 14, 15, 16, 17}:
-            tmp_hour = 12
-        else:
-            tmp_hour = 18
-        ts = ts.replace(microsecond=0, second=0, minute=0, hour=tmp_hour)
-        return ts
+        tmp_list = list(self.entry_list.copy().values())
+        tmp_list.reverse()
+
+        while len(tmp_list) > 0:
+            entry = tmp_list.pop()
+            ts = entry.get_timestamp_of_section()
+
+            if ts in res:
+                res[ts].append(entry)
+            else:
+                res[ts] = [entry]
+
+        return res
 
 
 class Entry:
     """
         Attributes:
-            time_stamp (str): DateTime. TimeStamp of entry.
+            time_stamp (datetime): DateTime. TimeStamp of entry.
             is_wp (bool): True if position reached waypoint.
             attitude (float): ft. Current attitude.
             true_track (float): °. ?.
@@ -172,3 +162,16 @@ class Entry:
 
     def __repr__(self):
         return 'Entry ' + str(self.__dict__)
+
+    def get_timestamp_of_section(self):
+        ts = self.time_stamp
+        if ts.hour in {0, 1, 2, 3, 4, 5}:
+            tmp_hour = 0
+        elif ts.hour in {6, 7, 8, 9, 10, 11}:
+            tmp_hour = 6
+        elif ts.hour in {12, 13, 14, 15, 16, 17}:
+            tmp_hour = 12
+        else:
+            tmp_hour = 18
+        ts = ts.replace(microsecond=0, second=0, minute=0, hour=tmp_hour)
+        return ts
