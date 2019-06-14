@@ -7,6 +7,7 @@ import datetime as dt
 import util
 import time
 
+
 def interpolating(flight_data, grib_data, num_waypoints):
     res = []
     at_waypoint = []
@@ -41,12 +42,13 @@ def interpolating(flight_data, grib_data, num_waypoints):
         res.append(res_values)
     return res, at_waypoint
 
+
 # arrival_time: time of arrival as last value on x-axis
 # height: highest displayed point above sea level
-def plotting(num_waypoints, res, at_waypoint):
+def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
 
     #exception handling
-    if num_waypoints == 0:
+    if num_waypoints_or_timestamps == 0:
         print("Number of waypoints must be higher than 0")
         exit(1)
 
@@ -55,9 +57,6 @@ def plotting(num_waypoints, res, at_waypoint):
     UPPER_LIMIT = 1000
     LOWER_LIMIT = 50
 
-    # getti
-    #res = []
-    #at_waypoint = []
 
     # putting data in lists
     heights = {}
@@ -88,17 +87,14 @@ def plotting(num_waypoints, res, at_waypoint):
 
     ax1 = fig.add_subplot(111, sharex=ax)
 
- #   ax2 = ax1.twinx()
 
     heat_array = []
     lvl_cnt = 0
     for lvl in u_comp.keys():
         lvl_cnt += 1
         heat_array.append(temperature.get(lvl))
-        print(temperature.get(lvl))
-#        ax1.barbs(np.arange(1, num_waypoints + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5.5 ,rasterized=True)
 
-    # Höhe der Wegpunkte
+    # Höhe
     height_pressure_upper = {}
     height_upper = {}
     height_pressure_lower = {}
@@ -107,10 +103,14 @@ def plotting(num_waypoints, res, at_waypoint):
     height_original = []
 
     index = 0
-    lat_lon = []
+    xlabels = []
 
-    for entry in at_waypoint:
-        lat_lon.append(str(entry.latitude) + ",\n " + str(entry.longitude))
+    for entry in at_entry:
+        if waypoints:
+            xlabels.append(str(entry.latitude) + ",\n " + str(entry.longitude))
+        #else:
+            #xlabels.append(time.strftime("%x\n%X", entry.time_stamp))
+            #xlabels.append(str(entry.time_stamp))
         height_pressure_upper[index+1] = []
         height_upper[index+1] = []
         height_pressure_lower[index+1] = []
@@ -124,7 +124,6 @@ def plotting(num_waypoints, res, at_waypoint):
                 height_lower[index + 1].append(v[index])
                 height_pressure_lower[index+1].append(k)
         index += 1
-
 
     pressure_upper = []
     for entry in height_pressure_upper.values():
@@ -152,7 +151,7 @@ def plotting(num_waypoints, res, at_waypoint):
             height_tmp_lower.append(float(0.0))
     # calculate pressure to height of vehicle
     result_pressure_height = []
-    for i in np.arange(0, num_waypoints, step=1):
+    for i in np.arange(0, num_waypoints_or_timestamps, step=1):
         lower_h = float(height_tmp_lower[i])
         upper_h = float(height_tmp_upper[i])
         original = float(height_original[i])
@@ -167,42 +166,35 @@ def plotting(num_waypoints, res, at_waypoint):
             add_to_lower = one_percent_p * percent_of_diff
             result_pressure_height.append(lower_p + add_to_lower)
 
-    #Temperatur
-    #xgrid, ygrid = np.meshgrid(temperature, heights)
-
-    #print(temperature.values())
-    #temp_array = []
-    #for i in temperature.values():
-    #    for j in i:
-    #        temp_array.append(j)
-
-
-    #ax1 = plt.imshow(heat_array, alpha=0.65, cmap='plasma')
-    im = ax1.imshow(heat_array, extent=[0,num_waypoints+1,0,num_waypoints], cmap='plasma')
+    # Temperature
+    im = ax1.imshow(heat_array, extent=[0,num_waypoints_or_timestamps+1,0,num_waypoints_or_timestamps], cmap='plasma')
 
     ax2 = ax1.twinx()
     lvl_cnt = 0
     for lvl in u_comp.keys():
         lvl_cnt += 1
-        ax2.barbs(np.arange(1, num_waypoints + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),
+        ax2.barbs(np.arange(1, num_waypoints_or_timestamps + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),
                  length=5.5, rasterized=True)
 
-    ax2.grid() #2
-    ax2.plot(np.arange(1, num_waypoints + 1, step=1), result_pressure_height, color='red') #2
-    ax2 = plt.gca() #2
-    ax2.invert_yaxis() #2
+    ax2.grid()
+    ax2.plot(np.arange(1, num_waypoints_or_timestamps + 1, step=1), result_pressure_height, color='red')
+    ax2 = plt.gca()
+    ax2.invert_yaxis()
 
-    ax1.set_xlabel("Waypoints (lat/lon)")
-    ax2.set_xticks(np.arange(1, num_waypoints + 1, step=1))
-    ax2.set_xticklabels(lat_lon)
+    ax2.set_xticks(np.arange(1, num_waypoints_or_timestamps + 1, step=1))
+    ax2.set_xticklabels(xlabels)
     ax2.set_ylabel("Pressure (hPa)")
     ax.axes.get_yaxis().set_visible(False)
     ax1.axes.get_yaxis().set_visible(False)
     cbaxes = fig.add_axes([0.02, 0.15, 0.03, 0.7])  # This is the position for the colorbar
     cbaxes.set_xlabel("Temp. (K)")
     cb = plt.colorbar(im, cax=cbaxes)
-    #fig.colorbar(im, ax=ax)
-    #fig.tight_layout()
+
+    if waypoints:
+        ax1.set_xlabel("Waypoints (lat/lon)")
+    else:
+        ax1.set_xlabel("Timestamps (Datetime)")
+
 
     plt.show()
 
@@ -216,4 +208,4 @@ if __name__ == '__main__':
     grib_data = grb.import_from_json("gfs.t00z.pgrb2.0p25.f003.json")
 
     res, wp = interpolating(flight_data, grib_data, 10)
-    plotting(10, res, wp)
+    plotting(10, res, wp, False)
