@@ -210,7 +210,7 @@ if __name__ == '__main__':
     flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
 
     #extracting json data
-    grib_data = grb.import_from_json("gfs.t00z.pgrb2.0p25.f003.json")
+    grib_data = grb.import_from_json("grib2_files/2019-06-04/gfs.t06z.pgrb2.0p25.f003.json")
 
     res, wp = interpolating(flight_data, grib_data, 10)
     plotting(10, res, wp)
