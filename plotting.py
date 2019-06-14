@@ -59,8 +59,6 @@ def plotting(num_waypoints, res, at_waypoint):
     #res = []
     #at_waypoint = []
 
-
-
     # putting data in lists
     heights = {}
     u_comp = {}
@@ -88,7 +86,8 @@ def plotting(num_waypoints, res, at_waypoint):
                     temperature[val[0]].append(val[4])
     fig, ax = plt.subplots()
 
-    ax1 = fig.add_subplot(111)
+    ax1 = fig.add_subplot(111, sharex=ax)
+
  #   ax2 = ax1.twinx()
 
     heat_array = []
@@ -180,8 +179,6 @@ def plotting(num_waypoints, res, at_waypoint):
 
     #ax1 = plt.imshow(heat_array, alpha=0.65, cmap='plasma')
     im = ax1.imshow(heat_array, cmap='plasma')
-    #cax = fig.add_axes([0.21, 0.95, 0.6, 0.03])  # [left, bottom, width, height]
-    #ax1.colorbar(im, cax=cax, orientation='vertical')
 
     ax2 = ax1.twinx()
     lvl_cnt = 0
@@ -195,11 +192,17 @@ def plotting(num_waypoints, res, at_waypoint):
     ax2 = plt.gca() #2
     ax2.invert_yaxis() #2
 
-    ax2.set_xlabel("Waypoints")
-    ax2.set_xticks(np.arange(1,num_waypoints + 1, step=1))
+    ax1.set_xlabel("Waypoints (lat/lon)")
+    ax2.set_xticks(np.arange(1, num_waypoints + 1, step=1))
     ax2.set_xticklabels(lat_lon)
-    ax2.set_ylabel("Pressure")
-    fig.tight_layout()
+    ax2.set_ylabel("Pressure (hPa)")
+    ax.axes.get_yaxis().set_visible(False)
+    ax1.axes.get_yaxis().set_visible(False)
+    cbaxes = fig.add_axes([0.02, 0.15, 0.03, 0.7])  # This is the position for the colorbar
+    cbaxes.set_xlabel("Temp. (K)")
+    cb = plt.colorbar(im, cax=cbaxes)
+    #fig.colorbar(im, ax=ax)
+    #fig.tight_layout()
 
     plt.show()
 
