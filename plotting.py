@@ -9,18 +9,19 @@ import time
 
 # arrival_time: time of arrival as last value on x-axis
 # height: highest displayed point above sea level
-def plotting(num_waypoints):
+def plotting(num_waypoints, flight_data, grib_data):
 
+    #exception handling
+    if num_waypoints == 0:
+        print("Number of waypoints must be higher than 0")
+        exit(1)
+
+    # constants
     FEET_TO_METERS = 0.305
     UPPER_LIMIT = 1000
     LOWER_LIMIT = 50
 
-
-    flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
-
-    #extracting json data
-    grib_data = grb.import_from_json("gfs.t00z.pgrb2.0p25.f003.json")
-
+    # getti
     res = []
     at_waypoint = []
     for entry in flight_data.get_path_filtered(num_waypoints):
@@ -77,27 +78,25 @@ def plotting(num_waypoints):
                         if val[0] not in temperature:
                             temperature[val[0]] = []
                         temperature[val[0]].append(val[4])
+    print(at_waypoint)
+    fig, ax = plt.subplots()
 
-    fig = plt.figure()
     ax1 = fig.add_subplot(111)
-    ax = ax1.twinx()
-    #fig, ax = plt.subplots()
+ #   ax2 = ax1.twinx()
 
     heat_array = []
     lvl_cnt = 0
     for lvl in u_comp.keys():
         lvl_cnt += 1
         heat_array.append(temperature.get(lvl))
-        #print(temperature.get(lvl))
-        plt.barbs(np.arange(1, num_waypoints + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5.5 ,rasterized=True)
-
-
-    ax1.imshow(heat_array, cmap='plasma', interpolation='nearest')
+        print(temperature.get(lvl))
+#        ax1.barbs(np.arange(1, num_waypoints + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5.5 ,rasterized=True)
 
     # Höhe der Wegpunkte
     height_pressure_upper = {}
     height_upper = {}
     height_pressure_lower = {}
+
     height_lower = {}
     height_original = []
 
@@ -162,16 +161,47 @@ def plotting(num_waypoints):
             add_to_lower = one_percent_p * percent_of_diff
             result_pressure_height.append(lower_p + add_to_lower)
 
-    plt.grid()
-    plt.plot(np.arange(1, num_waypoints + 1, step=1), result_pressure_height)
-    ax.set_xlabel("Waypoints")
-    ax.set_xticks(np.arange(1,num_waypoints + 1, step=1))
-    ax.set_xticklabels(lat_lon)
-    ax.set_ylabel("Pressure")
+    #Temperatur
+    #xgrid, ygrid = np.meshgrid(temperature, heights)
+
+    #print(temperature.values())
+    #temp_array = []
+    #for i in temperature.values():
+    #    for j in i:
+    #        temp_array.append(j)
+
+    ax1.grid() #2
+    ax1.plot(np.arange(1, num_waypoints + 1, step=1), result_pressure_height) #2
+    #plt.plot(np.arange(1, num_waypoints + 1, step=1), pressure_upper)
+    #plt.plot(np.arange(1,num_waypoints + 1, step=1), pressure_lower)
+    ax1.set_xlabel("Waypoints")
+    ax1.set_xticks(np.arange(1,num_waypoints + 1, step=1))
+    ax1.set_xticklabels(lat_lon)
+    ax1.set_ylabel("Pressure")
     fig.tight_layout()
-    ax = plt.gca()
-    ax.invert_yaxis()
+    ax2 = plt.gca() #2
+    ax2.invert_yaxis() #2
+
+    #heatmap, x, y = np.histogram2d(np.array(temp_array), np.arange(0, 230, step=1))
+
+    #ax1 = plt.imshow(heat_array, alpha=0.65, cmap='plasma')
+    ax1.imshow(heat_array, alpha=0.65, cmap='plasma')
+
+    ax2 = ax1.twinx()
+    lvl_cnt = 0
+    for lvl in u_comp.keys():
+        lvl_cnt += 1
+        ax2.barbs(np.arange(1, num_waypoints + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),
+                 length=5.5, rasterized=True)
+
     plt.show()
 
+
 if __name__ == '__main__':
-    plotting(10)
+
+    flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
+
+    #extracting json data
+    grib_data = grb.import_from_json("gfs.t00z.pgrb2.0p25.f003.json")
+
+    plotting(10, flight_data, grib_data)
