@@ -1,13 +1,9 @@
-import matplotlib.dates as dat
 import matplotlib.pyplot as plt
 import numpy as np
-import grib2_extractor as grb
-import FlightData as Fd
-import datetime as dt
 import util
-import time
 
-def interpolating(flight_data, grib_data, num_waypoints):
+
+def interpolating(flight_data, grib_datas, num_waypoints):
     res = []
     at_waypoint = []
 
@@ -214,17 +210,3 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
     plt.show()
 
 
-if __name__ == '__main__':
-
-    flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
-
-    grib_datas = {}
-
-    for key in flight_data.split_in_timesecions().keys():
-        grib_datas[key] = [grb.import_from_json(
-            'grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json')]
-        grib_datas[key].append(grb.import_from_json(
-            'grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json'))
-
-    res, wp = interpolating(flight_data, grib_datas, 10)
-    plotting(10, res, wp, False)
