@@ -122,8 +122,8 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
     for entry in at_entry:
         if waypoints:
             xlabels.append(str(entry.latitude) + ",\n " + str(entry.longitude))
-        #else:
-            #xlabels.append(time.strftime("%x\n%X", entry.time_stamp))
+        else:
+            xlabels.append(entry.time_stamp.strftime("%d/%m/%y\n%H:%M:%S"))
             #xlabels.append(str(entry.time_stamp))
         height_pressure_upper[index+1] = []
         height_upper[index+1] = []
@@ -227,4 +227,4 @@ if __name__ == '__main__':
             'grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json'))
 
     res, wp = interpolating(flight_data, grib_datas, 10)
-    plotting(10, res, wp,False)
+    plotting(10, res, wp, False)
