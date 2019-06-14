@@ -78,13 +78,21 @@ def plotting(num_waypoints):
                             temperature[val[0]] = []
                         temperature[val[0]].append(val[4])
 
-    fig, ax = plt.subplots()
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    ax = ax1.twinx()
+    #fig, ax = plt.subplots()
 
-
+    heat_array = []
     lvl_cnt = 0
     for lvl in u_comp.keys():
         lvl_cnt += 1
+        heat_array.append(temperature.get(lvl))
+        #print(temperature.get(lvl))
         plt.barbs(np.arange(1, num_waypoints + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),length=5.5 ,rasterized=True)
+
+
+    ax1.imshow(heat_array, cmap='plasma', interpolation='nearest')
 
     # Höhe der Wegpunkte
     height_pressure_upper = {}
@@ -111,6 +119,7 @@ def plotting(num_waypoints):
                 height_lower[index + 1].append(v[index])
                 height_pressure_lower[index+1].append(k)
         index += 1
+
 
     pressure_upper = []
     for entry in height_pressure_upper.values():
