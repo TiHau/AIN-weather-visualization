@@ -38,6 +38,7 @@ def download_file(time_stamp, local_path):
 
 if __name__ == '__main__':
     flight_data = FlightData.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
-    first_ts = flight_data.get_first_time_stamp()
-    last_ts = flight_data.get_last_time_stamp()
+    tmp_list = list(flight_data.entry_list.values())
+    first_ts = tmp_list[0].get_timestamp_of_section()
+    last_ts = tmp_list[len(tmp_list) - 1].get_timestamp_of_section()
     download(first_ts, last_ts)
