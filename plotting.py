@@ -178,7 +178,7 @@ def plotting(num_waypoints, res, at_waypoint):
 
 
     #ax1 = plt.imshow(heat_array, alpha=0.65, cmap='plasma')
-    im = ax1.imshow(heat_array, cmap='plasma')
+    im = ax1.imshow(heat_array, extent=[0,num_waypoints+1,0,num_waypoints], cmap='plasma')
 
     ax2 = ax1.twinx()
     lvl_cnt = 0
