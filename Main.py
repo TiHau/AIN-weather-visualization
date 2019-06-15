@@ -14,8 +14,9 @@ if __name__ == '__main__':
     last_ts = tmp_list[len(tmp_list) - 1].get_timestamp_of_section()
     downloader.download(first_ts, last_ts)
 
-
+    lastkey = 0
     for key in flight_data.split_in_timesecions().keys():
+        lastkey = key
         try:
             open('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json', 'r')
             os.remove('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json')
@@ -23,20 +24,15 @@ if __name__ == '__main__':
             os.remove('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json')
         except FileNotFoundError:
             pass
-        path, grib_data = grb.extract('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json',
+    arr = os.listdir('grib2_files/' + lastkey.strftime('%Y-%m-%d'))
+    for file in arr:
+        print("extract " + file)
+        path, grib_data = grb.extract('grib2_files/' + lastkey.strftime('%Y-%m-%d') + '/' + file,
                                             util.round_to_nearest_quarter_down(flight_data.get_min_latitude()),
                                             util.round_to_nearest_quarter_down(flight_data.get_min_longitude()),
                                             util.round_to_nearest_quarter_up(flight_data.get_max_latitude()),
                                             util.round_to_nearest_quarter_up(flight_data.get_max_longitude()),["wind", "height", "temp"])
-        grb.export_to_json(grib_data, path + ".json")
-        path, grib_data = grb.extract(
-            'grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json',
-            util.round_to_nearest_quarter_down(flight_data.get_min_latitude()),
-            util.round_to_nearest_quarter_down(flight_data.get_min_longitude()),
-            util.round_to_nearest_quarter_up(flight_data.get_max_latitude()),
-            util.round_to_nearest_quarter_up(flight_data.get_max_longitude()), ["wind", "height", "temp"])
-        grb.export_to_json(grib_data, path + ".json")
-
+        grb.export_to_json(grib_data, path)
 
     grib_datas = {}
 
@@ -65,7 +61,7 @@ if __name__ == '__main__':
         for key, value in grib_data.items():
             for key2, value2 in value.items():
                 for key3, value3 in value2.parameters.items():
-                    if grib_data[key][key2].parameters[key3].data != '--':
+                    if grib_data2[key][key2].parameters[key3].data != '--' and value3.data != '--':
                         grib_data[key][key2].parameters[key3].data = (value3.data + grib_data2[key][key2].parameters[
                             key3].data) / 2
 
