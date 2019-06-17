@@ -6,6 +6,7 @@ import FlightData as Fd
 import datetime as dt
 import util
 import time
+from matplotlib.ticker import MultipleLocator
 
 def interpolating(flight_data, grib_data, num_waypoints):
     res = []
@@ -65,12 +66,7 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
     FEET_TO_METERS = 0.305
     UPPER_LIMIT = 1000
     LOWER_LIMIT = 50
-
-    # getti
-    #res = []
-    #at_waypoint = []
-
-
+    KELVIN_TO_CELSIUS = 273
 
     # putting data in lists
     heights = {}
@@ -96,7 +92,7 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
                 elif val[2] == 'Temperature':
                     if val[0] not in temperature:
                         temperature[val[0]] = []
-                    temperature[val[0]].append(val[4])
+                    temperature[val[0]].append(val[4] - KELVIN_TO_CELSIUS)
     fig, ax = plt.subplots()
 
     ax1 = fig.add_subplot(111, sharex=ax)
@@ -191,7 +187,12 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
         ax2.barbs(np.arange(1, num_waypoints_or_timestamps + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),
                  length=5.5, rasterized=True)
 
-    ax2.grid()
+    spacing = 50  # This can be your user specified spacing.
+    minorLocator = MultipleLocator(spacing)
+    # Set minor tick locations.
+    ax2.yaxis.set_minor_locator(minorLocator)
+    # Set grid to use minor tick locations.
+    ax2.grid(which='minor')
     ax2.plot(np.arange(1, num_waypoints_or_timestamps + 1, step=1), result_pressure_height, color='red')
     ax2 = plt.gca()
     ax2.invert_yaxis()
@@ -202,7 +203,7 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
     ax.axes.get_yaxis().set_visible(False)
     ax1.axes.get_yaxis().set_visible(False)
     cbaxes = fig.add_axes([0.02, 0.15, 0.03, 0.7])  # This is the position for the colorbar
-    cbaxes.set_xlabel("Temp. (K)")
+    cbaxes.set_xlabel("Temp. (°C)")
     cb = plt.colorbar(im, cax=cbaxes)
 
     if waypoints:
