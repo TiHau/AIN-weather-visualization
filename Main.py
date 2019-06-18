@@ -7,13 +7,18 @@ import downloader
 import FlightData as Fd
 
 if __name__ == '__main__':
+    NUM_POINTS = 10
+    WAYPOINTS_OR_TIME = False # False = Time, True = Waypoint
 
+    # Load Flight Data
     flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
     tmp_list = list(flight_data.entry_list.values())
     first_ts = tmp_list[0].get_timestamp_of_section()
     last_ts = tmp_list[len(tmp_list) - 1].get_timestamp_of_section()
+    # Download needed gfs files
     downloader.download(first_ts, last_ts)
 
+    # Remove old Json files and export new ones
     lastkey = 0
     for key in flight_data.split_in_timesecions().keys():
         lastkey = key
@@ -34,6 +39,7 @@ if __name__ == '__main__':
                                             util.round_to_nearest_quarter_up(flight_data.get_max_longitude()),["wind", "height", "temp"])
         grb.export_to_json(grib_data, path)
 
+    # import data from Json files
     grib_datas = {}
 
     for key in flight_data.split_in_timesecions().keys():
@@ -42,10 +48,11 @@ if __name__ == '__main__':
         grib_datas[key].append(grb.import_from_json(
             'grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json'))
 
+    # Interpolate data
     res = []
     at_waypoint = []
 
-    for entry in flight_data.get_path_filtered(10):
+    for entry in flight_data.get_path_filtered(NUM_POINTS):
         tl_lat = util.round_to_nearest_quarter_up(entry.latitude)
         tl_long = util.round_to_nearest_quarter_down(entry.longitude)
         bl_lat = util.round_to_nearest_quarter_down(entry.latitude)
@@ -84,4 +91,5 @@ if __name__ == '__main__':
                 except:
                     pass
         res.append(res_values)
-    plotting(10, res, at_waypoint, False)
+    # plot data
+    plotting(NUM_POINTS, res, at_waypoint, False)
