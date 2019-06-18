@@ -1,14 +1,21 @@
-import matplotlib.dates as dat
 import matplotlib.pyplot as plt
 import numpy as np
 import grib2_extractor as grb
 import FlightData as Fd
-import datetime as dt
 import util
-import time
 from matplotlib.ticker import MultipleLocator
 
 def interpolating(flight_data, grib_data, num_waypoints):
+    """
+    Interpolates over grib_data extracts and FlightData objects
+        Args:
+            flight_data (FlightData): DateTime. TimeStamp of entry.
+            grib_data (dict): extracted data from grib files
+            num_waypoints (Integer): number of waypoints to be interpolated over
+        Returns:
+            res (list): results of interpolation for
+            at_waypoint(list): entries for each waypoint in flight_data
+        """
     res = []
     at_waypoint = []
 
@@ -53,11 +60,18 @@ def interpolating(flight_data, grib_data, num_waypoints):
         res.append(res_values)
     return res, at_waypoint
 
-# arrival_time: time of arrival as last value on x-axis
-# height: highest displayed point above sea level
-def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
 
-    #exception handling
+def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
+    """
+        Analyzes the data that is given as argument and displays it in a plot
+        Args:
+            num_waypoints_or_timestamps (Integer): Number of waypoints/timestamps to be plotted
+            res (list): result res of function interpolating()
+            at_entry (list): result at_waypoint of function interpolating()
+            waypoints (Boolean): Set to true if you want to see the waypoints on x-axis, false if you need timestamps
+        """
+
+    # quick exception handling
     if num_waypoints_or_timestamps == 0:
         print("Number of waypoints must be higher than 0")
         exit(1)
@@ -93,11 +107,8 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
                     if val[0] not in temperature:
                         temperature[val[0]] = []
                     temperature[val[0]].append(val[4] - KELVIN_TO_CELSIUS)
-    fig, ax = plt.subplots()
 
-    ax1 = fig.add_subplot(111, sharex=ax)
-
-
+    # preparing temperature for plotting
     heat_array = []
     lvl_cnt = 0
     for lvl in u_comp.keys():
@@ -108,10 +119,8 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
     height_pressure_upper = {}
     height_upper = {}
     height_pressure_lower = {}
-
     height_lower = {}
     height_original = []
-
     index = 0
     xlabels = []
 
@@ -120,7 +129,6 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
             xlabels.append(str(entry.latitude) + ",\n " + str(entry.longitude))
         else:
             xlabels.append(entry.time_stamp.strftime("%d/%m/%y\n%H:%M:%S"))
-            #xlabels.append(str(entry.time_stamp))
         height_pressure_upper[index+1] = []
         height_upper[index+1] = []
         height_pressure_lower[index+1] = []
@@ -133,8 +141,8 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
             if v[index] <= entry.attitude*FEET_TO_METERS:
                 height_lower[index + 1].append(v[index])
                 height_pressure_lower[index+1].append(k)
-        index += 1
 
+        index += 1
 
     pressure_upper = []
     for entry in height_pressure_upper.values():
@@ -177,9 +185,12 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
             add_to_lower = one_percent_p * percent_of_diff
             result_pressure_height.append(lower_p + add_to_lower)
 
-    # Temperature
+    # Plotting temperature
+    fig, ax = plt.subplots()
+    ax1 = fig.add_subplot(111, sharex=ax)
     im = ax1.imshow(heat_array, extent=[0,num_waypoints_or_timestamps+1,0,num_waypoints_or_timestamps], cmap='plasma')
 
+    # Plotting wind barbs
     ax2 = ax1.twinx()
     lvl_cnt = 0
     for lvl in u_comp.keys():
@@ -187,30 +198,32 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
         ax2.barbs(np.arange(1, num_waypoints_or_timestamps + 1), lvl, np.array(u_comp.get(lvl)), np.array(v_comp.get(lvl)),
                  length=5.5, rasterized=True)
 
-    spacing = 50  # This can be your user specified spacing.
+    # adding grid lines
+    spacing = 50
     minorLocator = MultipleLocator(spacing)
-    # Set minor tick locations.
     ax2.yaxis.set_minor_locator(minorLocator)
-    # Set grid to use minor tick locations.
     ax2.grid(which='minor')
+
+    # plotting altitude of vehicle
     ax2.plot(np.arange(1, num_waypoints_or_timestamps + 1, step=1), result_pressure_height, color='red')
     ax2 = plt.gca()
     ax2.invert_yaxis()
 
+    # setting ticks and labels correctly
     ax2.set_xticks(np.arange(1, num_waypoints_or_timestamps + 1, step=1))
     ax2.set_xticklabels(xlabels)
     ax2.set_ylabel("Pressure (hPa)")
     ax.axes.get_yaxis().set_visible(False)
     ax1.axes.get_yaxis().set_visible(False)
-    cbaxes = fig.add_axes([0.02, 0.15, 0.03, 0.7])  # This is the position for the colorbar
-    cbaxes.set_xlabel("Temp. (°C)")
-    cb = plt.colorbar(im, cax=cbaxes)
-
     if waypoints:
         ax1.set_xlabel("Waypoints (lat/lon)")
     else:
         ax1.set_xlabel("Timestamps (Datetime)")
 
+    # adding color bar on the left side of the plot
+    cbaxes = fig.add_axes([0.02, 0.15, 0.03, 0.7])
+    cbaxes.set_xlabel("Temp. (°C)")
+    cb = plt.colorbar(im, cax=cbaxes)
 
     plt.show()
 
@@ -226,6 +239,7 @@ if __name__ == '__main__':
             'grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json')]
         grib_datas[key].append(grb.import_from_json(
             'grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json'))
+
 
     res, wp = interpolating(flight_data, grib_datas, 10)
     plotting(10, res, wp, False)
