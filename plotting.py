@@ -128,7 +128,7 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
             result_pressure_height.append(lower_p + add_to_lower)
 
     # Plotting temperature
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(70, 70))
     ax1 = fig.add_subplot(111, sharex=ax)
     im = ax1.imshow(heat_array, extent=[0, num_waypoints_or_timestamps+1,0,num_waypoints_or_timestamps], cmap='plasma')
 
@@ -168,5 +168,6 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
     cb = plt.colorbar(im, cax=cbaxes)
 
     plt.show()
+    fig.savefig("plot.png")
 
 
