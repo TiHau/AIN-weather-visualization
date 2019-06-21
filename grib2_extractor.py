@@ -67,7 +67,7 @@ class Parameter:
 
 
 def extract(file_path, lat1, lon1, lat2, lon2, list_params_extract):
-    """extracts data from gfs file and save it into position map
+    """extracts data from gfs file and save it into extractor dictionary
         the extracted data is between the coordinate1 and coordinate2
 
         Args:
