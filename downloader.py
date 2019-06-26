@@ -10,7 +10,6 @@ def download(start, end):
                     start (datetime): first timestamp of simulation.
                     end (datetime): last timestamp of simulation.
                        """
-    start -= datetime.timedelta(hours=6)
     while start <= end:
         local_path = 'grib2_files/' + start.strftime('%Y-%m-%d')
         os.makedirs(local_path, exist_ok=True)
