@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     # Remove old Json files and export new ones
     lastkey = 0
-    for key in flight_data.split_in_timesecions().keys():
+    for key in flight_data.split_in_timesections():
         lastkey = key
         try:
             open('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json', 'r')
