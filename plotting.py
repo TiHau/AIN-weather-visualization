@@ -70,7 +70,7 @@ def plotting(num_waypoints_or_timestamps, res, at_entry, waypoints):
         if waypoints:
             xlabels.append(str(entry.latitude) + ",\n " + str(entry.longitude))
         else:
-            xlabels.append(entry.time_stamp.strftime("%d/%m/%y\n%H:%M:%S"))
+            xlabels.append(entry.timestamp.strftime("%d/%m/%y\n%H:%M:%S"))
         height_pressure_upper[index+1] = []
         height_upper[index+1] = []
         height_pressure_lower[index+1] = []
