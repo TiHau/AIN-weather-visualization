@@ -4,11 +4,11 @@ import os
 
 
 def download(start, end):
-    """downloads all files from start -6 hours to end +6 hours
+    """downloads all files from start to end
 
             Args:
-                    start (datetime): first timestamp of simulation.
-                    end (datetime): last timestamp of simulation.
+                    start (datetime): first timestamp to download.
+                    end (datetime): last timestamp to download.
                        """
     while start <= end:
         local_path = 'grib2_files/' + start.strftime('%Y-%m-%d')
