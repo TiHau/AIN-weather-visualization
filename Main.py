@@ -6,6 +6,7 @@ import util
 from plotting import plotting
 import downloader
 import FlightData as Fd
+from threading import Thread
 
 if __name__ == '__main__':
     NUM_POINTS = 10
@@ -15,30 +16,38 @@ if __name__ == '__main__':
     flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
     tmp_list = list(flight_data.entry_list.values())
     first_ts = tmp_list[0].get_timestamp_of_section()
+    first_ts -= datetime.timedelta(hours=6)
     last_ts = tmp_list[len(tmp_list) - 1].get_timestamp_of_section()
     # Download needed gfs files
     downloader.download(first_ts, last_ts)
 
     # Remove old Json files and export new ones
-    lastkey = 0
-    for key in flight_data.split_in_timesections():
-        lastkey = key
+    for file in [pos_json for pos_json in os.listdir('grib2_files/' + last_ts.strftime('%Y-%m-%d')) if pos_json.endswith ('.json')]:
         try:
-            open('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json', 'r')
-            os.remove('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f003.json')
-            open('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json', 'r')
-            os.remove('grib2_files/' + key.strftime('%Y-%m-%d') + '/gfs.t' + key.strftime('%H') + 'z.pgrb2.0p25.f006.json')
+            open('grib2_files/' + last_ts.strftime('%Y-%m-%d') + '/' + file, 'r')
+            print('removed file: ' + file)
+            os.remove('grib2_files/' + last_ts.strftime('%Y-%m-%d') + '/' + file)
         except FileNotFoundError:
             pass
-    arr = os.listdir('grib2_files/' + lastkey.strftime('%Y-%m-%d'))
+    arr = os.listdir('grib2_files/' + last_ts.strftime('%Y-%m-%d'))
+    threads = []
+    def procedure(file):
+        path, grib_data = grb.extract('grib2_files/' + last_ts.strftime('%Y-%m-%d') + '/' + file,
+                                      util.round_to_nearest_quarter_down(flight_data.get_min_latitude()),
+                                      util.round_to_nearest_quarter_down(flight_data.get_min_longitude()),
+                                      util.round_to_nearest_quarter_up(flight_data.get_max_latitude()),
+                                      util.round_to_nearest_quarter_up(flight_data.get_max_longitude()),
+                                      ["wind", "height", "temp"])
+        grb.export_to_json(grib_data, path)
+
     for file in arr:
         print("extract " + file)
-        path, grib_data = grb.extract('grib2_files/' + lastkey.strftime('%Y-%m-%d') + '/' + file,
-                                            util.round_to_nearest_quarter_down(flight_data.get_min_latitude()),
-                                            util.round_to_nearest_quarter_down(flight_data.get_min_longitude()),
-                                            util.round_to_nearest_quarter_up(flight_data.get_max_latitude()),
-                                            util.round_to_nearest_quarter_up(flight_data.get_max_longitude()),["wind", "height", "temp"])
-        grb.export_to_json(grib_data, path)
+        t = Thread(target=procedure, args=(file,))
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
 
     # import data from Json files
     grib_datas = {}
