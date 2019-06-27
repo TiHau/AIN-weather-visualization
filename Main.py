@@ -11,9 +11,10 @@ from threading import Thread
 if __name__ == '__main__':
     NUM_POINTS = 10
     WAYPOINTS_OR_TIME = False  # False = Time, True = Waypoint
+    SIMULATION_FILE = '2019-05-01_EDDM-EDDH_Aviator.tsv'
 
     # Load Flight Data
-    flight_data = Fd.FlightData('2019-05-01_EDDM-EDDH_Aviator.tsv')
+    flight_data = Fd.FlightData(SIMULATION_FILE)
     tmp_list = list(flight_data.entry_list.values())
     first_ts = tmp_list[0].get_timestamp_of_section()
     first_ts -= datetime.timedelta(hours=6)
