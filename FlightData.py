@@ -19,6 +19,11 @@ class FlightData:
         return str(self.entry_list)
 
     def get_path_filtered(self, num_points):
+        """
+        Splits the list into a number of entry's
+        :param num_points: The Number of entry's
+        :return:
+        """
         step_size = len(self.entry_list) / num_points
         key_index = 1
         path_filtered = []
@@ -54,6 +59,10 @@ class FlightData:
         return max(tmp)
 
     def split_in_timesections(self):
+        """
+        Returns a list of datetime's in 3 hour intervals
+        :return: Datetime
+        """
         res = []
 
         tmp_list = list(self.entry_list.copy().values())
@@ -93,6 +102,7 @@ class Entry:
 
     def get_timestamp_of_section(self):
         """
+        Round off the time stamp for the next eighth hour
         :return: DateTime
         """
         ts = self.timestamp
